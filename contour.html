@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Contour Plots &mdash; Lua Graphics Toolkit 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Lua Graphics Toolkit 1.0 documentation" href="index.html" />
+    <link rel="prev" title="Graphics" href="graphics.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="graphics.html" title="Graphics"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Lua Graphics Toolkit 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="contour-plots">
+<h1>Contour Plots<a class="headerlink" href="#contour-plots" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>GSL shell offers a contour plot function to draw contour curves of bidimensional functions. The current algorithm works correctly only for continuous functions and it may give bad results if the function has discontinuities.</p>
+<p>Here is an example of its utilization to plot the function <span class="math">\(f(x,y) = x^2 - y^2\)</span>:</p>
+<div class="highlight-lua"><div class="highlight"><pre><span class="n">contour</span><span class="p">.</span><span class="n">plot</span><span class="p">(</span><span class="k">function</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="k">return</span> <span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">-</span> <span class="n">y</span><span class="o">^</span><span class="mi">2</span> <span class="k">end</span><span class="p">,</span> <span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="figure">
+<img alt="_images/contour-plot-hyper.png" src="_images/contour-plot-hyper.png" />
+</div>
+<span class="target" id="module-contour"></span><dl class="function">
+<dt id="contour.plot">
+<tt class="descclassname">contour.</tt><tt class="descname">plot</tt><big>(</big><em>f</em>, <em>xmin</em>, <em>ymin</em>, <em>xmax</em>, <em>ymax</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#contour.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot a contour plot of the function <tt class="docutils literal"><span class="pre">f</span></tt> in the rectangle delimited by (xmin, ymin), (xmax, ymax) and return the plot itself.</p>
+<p>The <tt class="docutils literal"><span class="pre">options</span></tt> argument is an optional table that can contain the following fields:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">gridx</span></tt>, number of subdivision along x</li>
+<li><tt class="docutils literal"><span class="pre">gridy</span></tt>, number of subdivision along y</li>
+<li><tt class="docutils literal"><span class="pre">levels</span></tt>, number of contour levels or a list of the level values in monotonic order.</li>
+<li><tt class="docutils literal"><span class="pre">colormap</span></tt> a function that returns a color for the contour region. The argument of the function will be a number between 0 and 1.</li>
+<li><tt class="docutils literal"><span class="pre">show</span></tt>, specify if the plot should be shown. By default it is <tt class="docutils literal"><span class="pre">true</span></tt>.</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="contour.polar_plot">
+<tt class="descclassname">contour.</tt><tt class="descname">polar_plot</tt><big>(</big><em>f, R[, options]]</em><big>)</big><a class="headerlink" href="#contour.polar_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot a contour plot of the function <tt class="docutils literal"><span class="pre">f(x,</span> <span class="pre">y)</span></tt> over the circular domain of radius <tt class="docutils literal"><span class="pre">R</span></tt> and centered at the origin. The <tt class="docutils literal"><span class="pre">options</span></tt> table accepts the same fields as the function <a class="reference internal" href="#module-contour" title="contour"><tt class="xref py py-func docutils literal"><span class="pre">contour()</span></tt></a>.</p>
+<p>Example:</p>
+<div class="highlight-lua"><div class="highlight"><pre><span class="n">use</span> <span class="s1">&#39;</span><span class="s">math&#39;</span>
+
+<span class="n">p</span> <span class="o">=</span> <span class="n">contour</span><span class="p">.</span><span class="n">polar_plot</span><span class="p">(</span><span class="k">function</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="k">return</span> <span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">+</span><span class="mf">0.1</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="mf">0.3</span><span class="o">*</span><span class="n">y</span> <span class="k">end</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+<span class="n">p</span><span class="p">.</span><span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="s">cos(x) + cos(y) + 0.1*x + 0.3*y&#39;</span>
+</pre></div>
+</div>
+<div class="figure">
+<img alt="_images/polar-contour-example-cos-cos.png" src="_images/polar-contour-example-cos-cos.png" />
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Contour Plots</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="graphics.html"
+                        title="previous chapter">Graphics</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/contour.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="graphics.html" title="Graphics"
+             >previous</a> |</li>
+        <li><a href="index.html">Lua Graphics Toolkit 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Francesco Abbate.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

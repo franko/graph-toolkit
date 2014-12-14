@@ -1,5 +1,5 @@
 Package: lua-graph-toolkit
-Maintainer: Francesco Abbate <francesc.bbt@gmail.com>
+Maintainer: Francesco Abbate <francesco.bbt@gmail.com>
 Version: LGT_VERSION
 Architecture: LGT_ARCH
 Installed-Size: LGT_INSTALLED_SIZE

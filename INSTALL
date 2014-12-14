@@ -9,7 +9,12 @@ debian based systems are:
 
 - Anti-Grain geometry library, libagg-dev package
 - Freetype library, libfreetype6-dev package
-- LuaJIT2 shared library, libluajit-5.1-dev package
+- A Lua 5.1 library, either:
+    * LuaJIT, libluajit-5.1-dev package
+    * Lua 5.1, lua5.1 package
+
+To choose if you want to use Lua 5.1 or LuaJIT you should edit the file
+src/makeconfig and set the "LUA" variable to either lua5.1 or luajit.
 
 Once the packages above are installed you should be able to compile simply by typing:
 
@@ -23,7 +28,14 @@ or, as an alternative, you can build a debian package using
 
 > make debian
 
-The Lua's package will be named "graph" and can be called from luajit using
+On Debian based system like Debian itself, Ubuntu or Linux Mint the
+recommended way to use the graphics toolkit is to build and install the
+debian package.
+The installation of the debian package ensure that all the require files
+are installed in the appropriate directories.
+
+The Lua's package will be named "graph" and can be called from luajit or
+lua using:
 
 > require("graph")
 

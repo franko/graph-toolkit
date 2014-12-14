@@ -18,6 +18,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
+include src/makeconfig
+
 VERSION = 1.0
 
 PREFIX = /usr
@@ -63,7 +65,7 @@ debian:
 	cp src/libnatwin.so $(DEBIAN)/lib/lua/5.1/natwin.so
 	ln -s lua/5.1/graphcore.so $(DEBIAN)/lib/libgraphcore.so
 	cp $(GRAPH_LUA_SRC) $(DEBIAN)/share/lua/5.1/graph
-	fakeroot bash debian/build.sh $(VERSION)
+	fakeroot bash debian/build.sh $(VERSION) $(LUA)
 
 win_install:
 	$(MAKE) -C src

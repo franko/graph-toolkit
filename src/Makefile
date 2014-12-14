@@ -111,8 +111,8 @@ else
   FREETYPE_INCLUDES = $(shell pkg-config freetype2 --cflags)
   FREETYPE_LIBS = $(shell pkg-config freetype2 --libs)
 
-  LUA_INCLUDES = $(shell pkg-config --cflags luajit)
-  LUA_LIBS = $(shell pkg-config --libs luajit)
+  LUA_INCLUDES = $(shell pkg-config --cflags $(LUA))
+  LUA_LIBS = $(shell pkg-config --libs $(LUA))
 
   PTHREAD_DEFS += -pthread
   PTHREAD_LIBS = -lpthread

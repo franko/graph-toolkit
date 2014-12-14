@@ -1,9 +1,5 @@
 
-local bit = require 'bit'
-
 local floor, pi = math.floor, math.pi
-
-local bor, band, lshift, rshift = bit.bor, bit.band, bit.lshift, bit.rshift
 
 graph = require("graphcore")
 require("natwin")
@@ -192,20 +188,26 @@ function graph.rect(x1, y1, x2, y2)
    return p
 end
 
+local function uint8(x)
+   return math.floor(tonumber(x)) % 256
+end
+
 local function rgba(r, g, b, a)
-   r, g, b, a = tonumber(r), tonumber(g), tonumber(b), tonumber(a)
-   local rb = band(lshift(r, 24), 0xff000000)
-   local gb = band(lshift(g, 16), 0xff0000  )
-   local bb = band(lshift(b, 8 ), 0xff00    )
-   return bor(rb, gb, bb, a and band(a, 0xff) or 0xff)
+   return ((uint8(r) * 256 + uint8(g)) * 256 + uint8(b)) * 256 + uint8(a or 0)
+end
+
+local function div8(n)
+   local r = n % 256
+   return (n - r) / 256, r
 end
 
 local function rgba_decode(col)
    col = tonumber(col)
-   local r = rshift(band(col, 0xff000000), 24)
-   local g = rshift(band(col, 0xff0000), 16)
-   local b = rshift(band(col, 0xff00), 8)
-   local a = band(col, 0xff)
+   local r, g, b, a
+   col, a = div8(col)
+   col, b = div8(col)
+   col, g = div8(col)
+   col, r = div8(col)
    return r, g, b, a
 end
 
@@ -299,7 +301,7 @@ end
 
 function graph.webcolor(n)
    local p = #wcolors
-   return lshift(wcolors[(n-1) % p + 1], 8) + 0xff
+   return wcolors[(n-1) % p + 1] * 0x100 + 0xff
 end
 
 local color_schema = {

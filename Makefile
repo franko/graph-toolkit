@@ -47,12 +47,12 @@ clean:
 
 install:
 	$(MAKE) -C src
-	mkdir -p $(LUA_PATH)
+	mkdir -p $(LUA_PATH)/graph
 	mkdir -p $(LUA_DLLPATH)
 	cp src/libgraphcore.so $(LUA_DLLPATH)/graphcore.so
 	cp src/libnatwin.so $(LUA_DLLPATH)/natwin.so
 	ln -s $(LUA_DLLPATH)/graphcore.so $(SYSTEM_LIBPATH)/libgraphcore.so
-	cp $(GRAPH_LUA_SRC) $(LUA_PATH)
+	cp $(GRAPH_LUA_SRC) $(LUA_PATH)/graph
 
 debian:
 	$(MAKE) -C src

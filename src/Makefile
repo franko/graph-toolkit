@@ -39,12 +39,12 @@ ifeq ($(ARCH), i686)
 endif
 
 ifeq ($(strip $(DEBUG)), yes)
-  CFLAGS = -g -Wall
-  CXXFLAGS = -g -Wall
+  CFLAGS += -g -Wall
+  CXXFLAGS += -g -Wall
   DEFS += -LIBGRAPH_DEBUG
 else
-  CFLAGS = $(CCOPT_ARCH) -O2 -fomit-frame-pointer -ffast-math -Wall
-  CXXFLAGS = $(CCOPT_ARCH) -O2 -fno-exceptions -ffast-math -fno-rtti -Wall
+  CFLAGS += $(CCOPT_ARCH) -O2 -fomit-frame-pointer -ffast-math -Wall
+  CXXFLAGS += $(CCOPT_ARCH) -O2 -fno-exceptions -ffast-math -fno-rtti -Wall
 endif
 
 PTHREAD_DEFS += -D_REENTRANT

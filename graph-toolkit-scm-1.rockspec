@@ -43,6 +43,10 @@ external_dependencies = {
 }
 build = {
    type = "make",
+   build_variables = {
+     CFLAGS = "$(CFLAGS) -I$(LUA_INCDIR)",
+     CXXFLAGS = "$(CXXFLAGS) -I$(LUA_INCDIR)",
+   },
    install_variables = {
       PREFIX = "$(PREFIX)",
       LUA_PATH = "$(LUADIR)",

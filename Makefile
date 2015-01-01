@@ -50,8 +50,6 @@ install:
 	mkdir -p $(LUA_PATH)/graph
 	mkdir -p $(LUA_DLLPATH)
 	cp src/libgraphcore.so $(LUA_DLLPATH)/graphcore.so
-	cp src/libnatwin.so $(LUA_DLLPATH)/natwin.so
-	ln -s $(LUA_DLLPATH)/graphcore.so $(SYSTEM_LIBPATH)/libgraphcore.so
 	cp $(GRAPH_LUA_SRC) $(LUA_PATH)/graph
 
 debian:
@@ -62,8 +60,6 @@ debian:
 	mkdir -p $(DEBIAN)/share/lua/5.1/graph
 	mkdir -p $(DEBIAN)/lib/lua/5.1
 	cp src/libgraphcore.so $(DEBIAN)/lib/lua/5.1/graphcore.so
-	cp src/libnatwin.so $(DEBIAN)/lib/lua/5.1/natwin.so
-	ln -s lua/5.1/graphcore.so $(DEBIAN)/lib/libgraphcore.so
 	cp $(GRAPH_LUA_SRC) $(DEBIAN)/share/lua/5.1/graph
 	fakeroot bash debian/build.sh $(VERSION) $(LUA)
 
@@ -73,7 +69,6 @@ win_install:
 	mkdir -p $(WIN_INSTALL_DIR)/lua
 	mkdir -p $(WIN_INSTALL_DIR)/lua/graph
 	cp src/graphcore.dll $(WIN_INSTALL_DIR)
-	cp src/natwin.dll $(WIN_INSTALL_DIR)
 	cp $(GRAPH_LUA_SRC) $(WIN_INSTALL_DIR)/lua/graph
 	cp -r examples $(WIN_INSTALL_DIR)
 

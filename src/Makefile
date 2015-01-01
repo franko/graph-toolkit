@@ -82,7 +82,6 @@ ifeq ($(HOST_SYS),Windows)
   PTHREAD_LIBS = -lpthread
 
   LIBGRAPH_SO = graphcore.dll
-  LIBNATWIN_SO = natwin.dll
 
   LUA_INCLUDES = -IC:/fra/src/luajit-2.0/src
   LUA_LIBS = -LC:/fra/src/luajit-2.0/src -llua51
@@ -125,36 +124,34 @@ else
   DISPLAY_SUFFIX = x11
 
   LIBGRAPH_SO = libgraphcore.so
-  LIBNATWIN_SO = libnatwin.so
 endif
 
 LIBGRAPH_A = libgraphcore.a
-LIBNATWIN_A = libnatwin.a
 
 ifeq ($(HOST_SYS),Windows)
-  PLATFORM_NATWIN_SRC_FILES = agg_platform_support_win32.cpp agg_win32_bmp.cpp
-  PLATFORM_PLOT_SRC_FILES = agg_win32_bmp.cpp
+  PLATFORM_SRC_FILES = agg_platform_support_win32.cpp agg_win32_bmp.cpp agg_win32_bmp.cpp
 else
   ifeq ($(HOST_SYS),Darwin)
     DEFS += -DDARWIN_MACOSX
   endif
-  PLATFORM_NATWIN_SRC_FILES = agg_platform_support_x11.cpp
+  PLATFORM_SRC_FILES = agg_platform_support_x11.cpp
 endif
 
 INCLUDES += $(LUA_INCLUDES) $(FREETYPE_INCLUDES) $(X11_INCLUDES) $(AGG_INCLUDES)
 LIBS += $(FREETYPE_LIBS) $(AGG_LIBS) $(X11_LIBS) $(LUA_LIBS) $(PTHREAD_LIBS)
 DEFS += $(PTHREAD_DEFS)
 
-NATWIN_CSRC_FILES =
-NATWIN_CPPSRC_FILES = $(PLATFORM_NATWIN_SRC_FILES) canvas-window.cpp window.cpp
-
 PLOT_CSRC_FILES = str.c gs-types.c lua-utils.c lua-properties.c
-PLOT_CPPSRC_FILES = gamma.cpp printf_check.cpp utils.cpp window_registry.cpp fonts_search_$(DISPLAY_SUFFIX).cpp $(PLATFORM_PLOT_SRC_FILES) image_write_$(DISPLAY_SUFFIX).cpp fonts.cpp agg_font_freetype.cpp plot.cpp plot-auto.cpp units.cpp colors.cpp markers.cpp draw_svg.cpp canvas_svg.cpp lua-draw.cpp lua-text.cpp text.cpp agg-parse-trans.cpp lua-plot.cpp bitmap-plot.cpp lua-graph.cpp
+PLOT_CPPSRC_FILES = gamma.cpp printf_check.cpp utils.cpp \
+	window_registry.cpp fonts_search_$(DISPLAY_SUFFIX).cpp \
+	$(PLATFORM_SRC_FILES) image_write_$(DISPLAY_SUFFIX).cpp \
+	fonts.cpp agg_font_freetype.cpp plot.cpp plot-auto.cpp units.cpp \
+	colors.cpp markers.cpp draw_svg.cpp canvas_svg.cpp lua-draw.cpp\
+	lua-text.cpp text.cpp agg-parse-trans.cpp lua-plot.cpp \
+	bitmap-plot.cpp lua-graph.cpp canvas-window.cpp window.cpp
 PLOT_OBJ_FILES := $(PLOT_CSRC_FILES:%.c=%.o) $(PLOT_CPPSRC_FILES:%.cpp=%.o)
 
-NATWIN_OBJ_FILES := $(NATWIN_CSRC_FILES:%.c=%.o) $(NATWIN_CPPSRC_FILES:%.cpp=%.o)
-
-DEP_FILES := $(NATWIN_CPPSRC_FILES:%.cpp=.deps/%.P) $(NATWIN_CSRC_FILES:%.c=.deps/%.P) $(PLOT_CPPSRC_FILES:%.cpp=.deps/%.P) $(PLOT_CSRC_FILES:%.c=.deps/%.P)
+DEP_FILES := $(PLOT_CPPSRC_FILES:%.cpp=.deps/%.P) $(PLOT_CSRC_FILES:%.c=.deps/%.P)
 
 DEPS_MAGIC := $(shell mkdir .deps > /dev/null 2>&1 || :)
 
@@ -162,12 +159,12 @@ ifeq ($(strip $(BUILD)), dynamic)
   COMPILE = $(DYNCC) $(CFLAGS) $(DEFS) $(INCLUDES)
   CXXCOMPILE = $(DYNCXX) $(CXXFLAGS) $(DEFS) $(INCLUDES)
 
-  TARGETS = $(LIBGRAPH_SO) $(LIBNATWIN_SO)
+  TARGETS = $(LIBGRAPH_SO)
 else
   COMPILE = $(CC) $(CFLAGS) $(DEFS) $(INCLUDES)
   CXXCOMPILE = $(CXX) $(CXXFLAGS) $(DEFS) $(INCLUDES)
 
-  TARGETS = $(LIBGRAPH_A) $(LIBNATWIN_A)
+  TARGETS = $(LIBGRAPH_A)
 endif
 
 all: $(TARGETS)
@@ -176,16 +173,7 @@ $(LIBGRAPH_SO): $(PLOT_OBJ_FILES)
 	$(DLLINK) $(PLOT_OBJ_FILES) -o $@ $(LIBS) -lsupc++
 	strip --strip-unneeded $@
 
-$(LIBNATWIN_SO): $(NATWIN_OBJ_FILES) $(LIBGRAPH_SO)
-	$(DLLINK) $(NATWIN_OBJ_FILES) -o $@ $(LIBS) -L. -lgraphcore -lsupc++
-	strip --strip-unneeded $@
-
 $(LIBGRAPH_A): $(PLOT_OBJ_FILES)
-	@echo Archive $@
-	@$(AR) $@ $?
-	@$(RANLIB) $@
-
-$(LIBNATWIN_A): $(NATWIN_OBJ_FILES)
 	@echo Archive $@
 	@$(AR) $@ $?
 	@$(RANLIB) $@

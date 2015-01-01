@@ -2,7 +2,6 @@
 local floor, pi = math.floor, math.pi
 
 graph = require("graphcore")
-require("natwin")
 
 graphcore = nil
 

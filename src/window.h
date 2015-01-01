@@ -21,7 +21,7 @@ extern int  window_close                   (lua_State *L);
 extern int  window_close_wait              (lua_State *L);
 extern int  window_wait                    (lua_State *L);
 
-extern int  luaopen_natwin                 (lua_State *L);
+extern void natwin_register                (lua_State *L);
 
 __END_DECLS
 

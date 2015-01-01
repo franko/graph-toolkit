@@ -669,8 +669,8 @@ struct window_hooks nat_window_hooks[1] = {{
     }
 };
 
-int
-luaopen_natwin(lua_State *L)
+void
+natwin_register(lua_State *L)
 {
     app_window_hooks = nat_window_hooks;
 
@@ -680,7 +680,5 @@ luaopen_natwin(lua_State *L)
     luaL_register (L, NULL, window_methods);
     lua_pop (L, 1);
 
-    /* gsl module registration */
-    luaL_register (L, "graphcore", window_functions);
-    return 1;
+    luaL_register (L, NULL, window_functions);
 }

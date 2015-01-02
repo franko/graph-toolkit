@@ -35,7 +35,6 @@ GRAPH_LUA_SRC = init.lua contour.lua
 
 LUA_PATH = $(DEST_PREFIX)/share/lua/5.1
 LUA_DLLPATH = $(DEST_PREFIX)/lib/lua/5.1
-SYSTEM_LIBPATH = $(DEST_PREFIX)/lib
 DEBIAN = debian_build/$(PREFIX)
 WIN_INSTALL_DIR = windows_build
 

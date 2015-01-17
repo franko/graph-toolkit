@@ -41,7 +41,7 @@ function graph.ipathp(f)
          return true
       end
    end
-   local success
+   local success, more
    repeat
       success, more = pcall(next, success and line or move)
       if not success then print('warning:', more) end
@@ -82,7 +82,6 @@ function graph.filine(f, a, b)
    return graph.ipath(fn_isample(f, a, b))
 end
 
-function graph.xyline(x, y)
    local i0 = 1
    local n = #x
    local ln = graph.path(x[i0], y[i0])
@@ -321,7 +320,7 @@ graph.hue_color = hue_color
 function graph.plot_lines(ln, title)
    local p = graph.plot(title)
    for k=1, #ln do
-      p:addline(ln[k], rainbow(k))
+      p:addline(ln[k], graph.rainbow(k))
    end
    p:show()
    return p

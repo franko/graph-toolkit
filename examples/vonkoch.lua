@@ -1,4 +1,4 @@
-require "graph"
+local graph = require "graph"
 
 local function vonkoch(n)
     local pi, sqrt3_2 = math.pi, math.sqrt(3)/2

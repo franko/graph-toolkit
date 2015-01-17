@@ -1,4 +1,4 @@
-require "graph"
+local graph = require "graph"
 
 local pi, sqrt3_2 = math.pi, math.sqrt(3)/2
 
@@ -41,7 +41,7 @@ end
 
 -- Create an empty plot (canvas). Since it is created as a "canvas" we
 -- have to explicitily set the limits and perform the flush operation.
-p = graph.canvas("Von Koch's curve")
+local p = graph.canvas("Von Koch's curve")
 p:limits(-0.15, -1, 1.15, 0.3)
 p.units = false
 p:show()

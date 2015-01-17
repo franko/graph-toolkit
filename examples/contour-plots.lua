@@ -1,5 +1,4 @@
-require "graph"
-require "graph.contour"
+local contour = require "graph.contour"
 
 local sin, cos, pi = math.sin, math.cos, math.pi
 

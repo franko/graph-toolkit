@@ -820,7 +820,7 @@ local contour_default = {gridx= 40, gridy= 40, levels= 10,
                          colormap= default_color_map,
                          lines= true, show= true, legend= true}
 
-contour = {}
+local contour = {}
 
 function contour.plot(f, x1, y1, x2, y2, options)
    local opt = opt_gener(options, contour_default)

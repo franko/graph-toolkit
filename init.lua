@@ -1,7 +1,7 @@
 
 local floor, pi = math.floor, math.pi
 
-graph = require("graphcore")
+local graph = require("graphcore")
 
 graphcore = nil
 

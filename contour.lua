@@ -23,7 +23,7 @@ local cos, sin, atan2 = math.cos, math.sin, math.atan2
 local floor = math.floor
 
 local insert = table.insert
-
+local graph = require"graph"
 local default_color_map = graph.color_function('redyellow', 255)
 
 local function divmod(a, b)

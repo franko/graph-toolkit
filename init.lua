@@ -1,5 +1,5 @@
 
-local floor, pi = math.floor, math.pi
+local floor, pi, min, max = math.floor, math.pi, math.min, math.max
 
 local graph = require("graphcore")
 
@@ -187,11 +187,11 @@ function graph.rect(x1, y1, x2, y2)
 end
 
 local function uint8(x)
-   return math.floor(tonumber(x)) % 256
+   return min(max(0,floor(tonumber(x)+0.5)),255)
 end
 
 local function rgba(r, g, b, a)
-   return ((uint8(r) * 256 + uint8(g)) * 256 + uint8(b)) * 256 + uint8(a or 0)
+   return ((uint8(r) * 256 + uint8(g)) * 256 + uint8(b)) * 256 + uint8(a or 255)
 end
 
 local function div8(n)

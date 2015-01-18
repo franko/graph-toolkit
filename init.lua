@@ -82,6 +82,7 @@ function graph.filine(f, a, b)
    return graph.ipath(fn_isample(f, a, b))
 end
 
+function graph.xyline(x, y)
    local i0 = 1
    local n = #x
    local ln = graph.path(x[i0], y[i0])

@@ -1,4 +1,4 @@
-require "graph"
+local graph = require "graph"
 
 local function histo()
     local pi = math.pi

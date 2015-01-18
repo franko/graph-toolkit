@@ -1,12 +1,12 @@
-require "graph"
+local graph = require "graph"
 
-local pi, sin, cos, exp = math.pi, math.sin, math.cos, math.exp
+local pi, cos, exp = math.pi, math.cos, math.exp
 
 local function integral_fill()
    local function f(x) return exp(-0.1*x) * cos(x) end
    local p = graph.plot "y = f(x)"
    local x0, x1 = 0, 10*pi
-   local cc = graph.fxline(f, x0, x1, k)
+   local cc = graph.fxline(f, x0, x1)
    p.sync = false
    p:limits(0, -1, 10*pi, 1)
    p:pushlayer()

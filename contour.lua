@@ -23,7 +23,7 @@ local cos, sin, atan2 = math.cos, math.sin, math.atan2
 local floor = math.floor
 
 local insert = table.insert
-
+local graph = require"graph"
 local default_color_map = graph.color_function('redyellow', 255)
 
 local function divmod(a, b)
@@ -820,7 +820,7 @@ local contour_default = {gridx= 40, gridy= 40, levels= 10,
                          colormap= default_color_map,
                          lines= true, show= true, legend= true}
 
-contour = {}
+local contour = {}
 
 function contour.plot(f, x1, y1, x2, y2, options)
    local opt = opt_gener(options, contour_default)

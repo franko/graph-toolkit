@@ -1,7 +1,7 @@
 
-local floor, pi = math.floor, math.pi
+local floor, pi, min, max = math.floor, math.pi, math.min, math.max
 
-graph = require("graphcore")
+local graph = require("graphcore")
 
 graphcore = nil
 
@@ -41,7 +41,7 @@ function graph.ipathp(f)
          return true
       end
    end
-   local success
+   local success, more
    repeat
       success, more = pcall(next, success and line or move)
       if not success then print('warning:', more) end
@@ -82,7 +82,6 @@ function graph.filine(f, a, b)
    return graph.ipath(fn_isample(f, a, b))
 end
 
-function graph.xyline(x, y)
    local i0 = 1
    local n = #x
    local ln = graph.path(x[i0], y[i0])
@@ -188,11 +187,11 @@ function graph.rect(x1, y1, x2, y2)
 end
 
 local function uint8(x)
-   return math.floor(tonumber(x)) % 256
+   return min(max(0,floor(tonumber(x)+0.5)),255)
 end
 
 local function rgba(r, g, b, a)
-   return ((uint8(r) * 256 + uint8(g)) * 256 + uint8(b)) * 256 + uint8(a or 0)
+   return ((uint8(r) * 256 + uint8(g)) * 256 + uint8(b)) * 256 + uint8(a or 255)
 end
 
 local function div8(n)
@@ -321,7 +320,7 @@ graph.hue_color = hue_color
 function graph.plot_lines(ln, title)
    local p = graph.plot(title)
    for k=1, #ln do
-      p:addline(ln[k], rainbow(k))
+      p:addline(ln[k], graph.rainbow(k))
    end
    p:show()
    return p

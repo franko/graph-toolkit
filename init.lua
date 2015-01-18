@@ -84,7 +84,7 @@ end
 
 function graph.xyline(x, y)
    local i0 = 1
-   local n = matrix.dim(x)
+   local n = #x
    local ln = graph.path(x[i0], y[i0])
    for i=i0+1, i0+n-1 do ln:line_to(x[i], y[i]) end
    return ln

@@ -1,18 +1,18 @@
 
 # Makefile
-# 
+#
 # Copyright (C) 2014 Francesco Abbate
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or (at
 # your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -50,6 +50,15 @@ install:
 	mkdir -p $(LUA_DLLPATH)
 	cp src/libgraphcore.so $(LUA_DLLPATH)/graphcore.so
 	cp $(GRAPH_LUA_SRC) $(LUA_PATH)/graph
+
+arch:
+	@mkdir -p ${LUA_PATH}/graph
+	@install -m 755 -d ${LUA_PATH}/graph
+	@install -m 755 ${GRAPH_LUA_SRC} ${LUA_PATH}/graph
+	@mkdir -p ${LUA_DLLPATH}
+	@install -m 755 -d ${LUA_DLLPATH}
+	@install -m 755 src/libgraphcore.so ${LUA_DLLPATH}/graphcore.so
+
 
 debian:
 	$(MAKE) -C src

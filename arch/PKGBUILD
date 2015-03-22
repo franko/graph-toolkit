@@ -1,0 +1,27 @@
+pkgname=graph-toolkit-git
+_pkgname=graph-toolkit
+pkgver=20150322
+pkgrel=1
+pkgdesc="Lua graph-toolkit"
+arch=('i686' 'x86_64')
+license=('BSD Licence')
+depends=('gsl' 'agg' 'lua51-bitop')
+makedepends=('git' 'libxft' 'freetype2' 'pkg-config')
+url="https://github.com/franko/graph-toolkit"
+source=('graph-toolkit::git+git://github.com/franko/graph-toolkit.git')
+md5sums=('SKIP')
+
+
+prepare() {
+  cd "$srcdir/"
+}
+
+build() {
+  cd "$srcdir/$_pkgname"
+  make || return 1
+}
+
+package() {
+  cd "$srcdir/$_pkgname"
+  make DEST_DIR="$pkgdir" arch
+}

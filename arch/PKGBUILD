@@ -8,8 +8,7 @@ license=('BSD Licence')
 depends=('gsl' 'agg' 'lua51-bitop')
 makedepends=('git' 'libxft' 'freetype2' 'pkg-config')
 url="https://github.com/franko/graph-toolkit"
-source=('graph-toolkit::git+git://github.com/franko/graph-toolkit.git'
-'make.patch')
+source=('graph-toolkit::git+git://github.com/franko/graph-toolkit.git')
 md5sums=('SKIP')
 
 

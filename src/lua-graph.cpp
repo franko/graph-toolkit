@@ -59,7 +59,7 @@ luaopen_graphcore(lua_State *L)
     draw_register(L);
     text_register(L);
     plot_register(L);
-    initialize_fonts(L);
+    initialize_fonts_lua(L);
     natwin_register(L);
     return 1;
 }

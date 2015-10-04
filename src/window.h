@@ -9,6 +9,11 @@ __BEGIN_DECLS
 
 #include "lua.h"
 
+enum {
+    window_is_running = 1,
+    window_cannot_start_thread,
+};
+
 extern int  window_slot_update             (lua_State *L);
 extern int  window_slot_refresh            (lua_State *L);
 extern int  window_save_slot_image         (lua_State *L);

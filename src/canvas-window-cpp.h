@@ -9,11 +9,6 @@
 #include "agg_trans_affine.h"
 #include "agg_color_rgba.h"
 
-extern "C" {
-#include "lua.h"
-#include "lauxlib.h"
-}
-
 #include "defs.h"
 #include "canvas.h"
 #include "utils.h"
@@ -30,11 +25,9 @@ protected:
 public:
 
     struct thread_info {
-        lua_State *L;
         canvas_window *win;
         int window_id;
-
-        thread_info (lua_State *L, canvas_window *win) : L(L), win(win) {};
+        thread_info (canvas_window *win, int id): win(win), window_id(id) {};
     };
 
     enum win_status_e { not_ready, running, error, closed };

@@ -85,7 +85,7 @@ public:
     int attach(sg_plot *plot, const char *spec);
     void draw_slot(int slot_id, bool update_req);
     void refresh_slot(int slot_id);
-    void start(lua_State *L, gslshell::ret_status& st);
+    int start_with_id(int window_id);
 
     void save_slot_image(int slot_id);
     void restore_slot_image(int slot_id);

@@ -377,40 +377,36 @@ int window_generic_oper_ext (lua_State *L,
     return 0;
 }
 
-void window::start (lua_State *L, gslshell::ret_status& st)
+int window::start_with_id(int window_id)
 {
     this->lock();
-
-    if (status != canvas_window::running)
-    {
+    if (status != canvas_window::running) {
         typedef canvas_window::thread_info thread_info;
-        std::auto_ptr<thread_info> inf(new thread_info(L, this));
-
-        this->window_id = window_index_add (L, -1);
-        inf->window_id = this->window_id;
-
-        if (! this->start_new_thread (inf))
-        {
-            window_index_remove (L, this->window_id);
+        std::auto_ptr<thread_info> inf(new thread_info(this, window_id));
+        if (!this->start_new_thread(inf)) {
             this->unlock();
-            st.error("error during thread initialization", "window creation");
+            return window_cannot_start_thread;
         }
-    }
-    else
-    {
+    } else {
         this->unlock();
-        st.error("window is already active", "window creation");
+        return window_is_running;
     }
+    return 0;
 }
 
 static void
 show_window(lua_State* L, window* win)
 {
-    gslshell::ret_status st;
-    win->start(L, st);
-
-    if (st.error_msg())
-        luaL_error (L, "%s (reported during %s)", st.error_msg(), st.context());
+    int window_id = window_index_add(L, -1);
+    int status = win->start_with_id(window_id);
+    if (status == window_is_running) {
+        luaL_error (L, "window is already active (reported during window creation)");
+    } else if (status == window_cannot_start_thread) {
+        luaL_error (L, "error during thread creation (reported during window creation)");
+    }
+    if (status != 0) {
+        window_index_remove(L, window_id);
+    }
 }
 
 static int

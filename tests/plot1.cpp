@@ -1,19 +1,18 @@
 #include <unistd.h>
 
-#include "window-cpp.h"
+#include "window.h"
 #include "path.h"
 
 static double my_fun_s(double x) { return (x*x + 0.2) * sin(x * 30); }
 static double my_fun_c(double x) { return (x*x + 0.2) * cos(x * 30); }
 
-draw::path *build_curve(double (*f)(double))
+draw::path *build_curve(double (*f)(double), double x1, double x2, int n)
 {
-    const int N = 256;
     draw::path *vs = new draw::path();
     agg::path_storage& p = vs->self();
-    p.move_to(-1.0, f(-1.0));
-    for (int i = 0; i < N; i++) {
-        double x = -1.0 + (i + 1) * 2.0 / N;
+    p.move_to(x1, f(x1));
+    for (int i = 0; i < n; i++) {
+        double x = x1 + (i + 1) * (x2 - x1) / n;
         p.line_to(x, f(x));
     }
     return vs;
@@ -27,7 +26,7 @@ int main()
 
     window *win = new window();
     plot *p = new plot_auto();
-    draw::path *line = build_curve(my_fun_s);
+    draw::path *line = build_curve(my_fun_s, -1.0, 1.0, 256);
     sg_object *sline = new trans::scaling(line);
     agg::rgba8 red(190,10,10,255);
     p->add(sline, red, true);
@@ -37,7 +36,7 @@ int main()
 
     sleep(2);
 
-    draw::path *line_c = build_curve(my_fun_c);
+    draw::path *line_c = build_curve(my_fun_c, -0.4, 0.4, 128);
     agg::rgba8 blue(10,10,190,255);
     sg_object *sline_c = new trans::scaling(line_c);
     p->add(sline_c, blue, true);

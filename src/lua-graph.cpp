@@ -28,7 +28,7 @@ extern "C" {
 #include "window_registry.h"
 #include "lua-draw.h"
 #include "lua-text.h"
-#include "window.h"
+#include "window_lua.h"
 #include "lua-plot.h"
 #include "window_hooks.h"
 

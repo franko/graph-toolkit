@@ -1,18 +1,18 @@
 
 # Makefile
-# 
+#
 # Copyright (C) 2014 Francesco Abbate
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or (at
 # your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -148,7 +148,8 @@ PLOT_CPPSRC_FILES = gamma.cpp printf_check.cpp utils.cpp \
 	fonts.cpp agg_font_freetype.cpp plot.cpp plot-auto.cpp units.cpp \
 	colors.cpp markers.cpp draw_svg.cpp canvas_svg.cpp lua-draw.cpp\
 	lua-text.cpp text.cpp agg-parse-trans.cpp lua-plot.cpp \
-	bitmap-plot.cpp lua-graph.cpp canvas-window.cpp window.cpp
+	bitmap-plot.cpp lua-graph.cpp canvas-window.cpp window.cpp \
+	window_lua.cpp
 PLOT_OBJ_FILES := $(PLOT_CSRC_FILES:%.c=%.o) $(PLOT_CPPSRC_FILES:%.cpp=%.o)
 
 DEP_FILES := $(PLOT_CPPSRC_FILES:%.cpp=.deps/%.P) $(PLOT_CSRC_FILES:%.c=.deps/%.P)

@@ -1,43 +1,6 @@
-
-extern "C" {
-#include "lua.h"
-#include "lauxlib.h"
-}
-
-#include "lua-defs.h"
-#include "window-cpp.h"
-#include "window_registry.h"
-#include "lua-cpp-utils.h"
-#include "gs-types.h"
+#include "window.h"
 #include "lua-plot-cpp.h"
-#include "split-parser.h"
-#include "lua-utils.h"
 #include "platform_support_ext.h"
-#include "window_hooks.h"
-
-__BEGIN_DECLS
-
-static int window_free            (lua_State *L);
-static int window_split           (lua_State *L);
-static int window_save_svg        (lua_State *L);
-
-static const struct luaL_Reg window_functions[] = {
-    {"window",        window_new},
-    {NULL, NULL}
-};
-
-static const struct luaL_Reg window_methods[] = {
-    {"show",           window_show          },
-    {"attach",         window_attach        },
-    {"layout",         window_split         },
-    {"update",         window_update        },
-    {"close",          window_close         },
-    {"save_svg",       window_save_svg      },
-    {"__gc",           window_free          },
-    {NULL, NULL}
-};
-
-__END_DECLS
 
 void window::ref::compose(bmatrix& a, const bmatrix& b)
 {
@@ -250,13 +213,6 @@ window::on_resize(int sx, int sy)
     }
 }
 
-struct refs_remove_function {
-    refs_remove_function(lua_State *_L, int k): L(_L), window_index(k) {}
-    void call(window::ref* ref) { if (ref->plot) window_refs_remove(L, ref->slot_id, window_index); }
-    lua_State* L;
-    int window_index;
-};
-
 bool
 window::split(const char *spec)
 {
@@ -272,20 +228,6 @@ window::split(const char *spec)
     bmatrix m0;
     ref::calculate(m_tree, m0, 0);
     return (parse_tree != NULL);
-}
-
-template <class Function>
-void window::plot_apply_rec(Function& f, ref::node* n)
-{
-    list<ref::node*> *ls;
-    for (ls = n->tree(); ls != NULL; ls = ls->next())
-        this->plot_apply_rec(f, ls->content());
-
-    ref* ref = n->content();
-    if (ref)
-    {
-        f.call(ref);
-    }
 }
 
 static const char *
@@ -342,41 +284,6 @@ int window::attach(sg_plot* plot, const char *spec)
     return r->slot_id;
 }
 
-typedef void (window::*window_slot_method_type)(int slot_id);
-
-int window_generic_oper (lua_State *L, window_slot_method_type method)
-{
-    window *win = object_check<window>(L, 1, GS_WINDOW);
-    int slot_id = luaL_checkinteger (L, 2);
-
-    win->lock();
-    if (win->status == canvas_window::running)
-    {
-        (win->*method)(slot_id);
-    }
-    win->unlock();
-
-    return 0;
-}
-
-template <class param_type>
-int window_generic_oper_ext (lua_State *L,
-                             void (window::*method)(int, param_type),
-                             param_type param)
-{
-    window *win = object_check<window>(L, 1, GS_WINDOW);
-    int slot_id = luaL_checkinteger (L, 2);
-
-    win->lock();
-    if (win->status == canvas_window::running)
-    {
-        (win->*method)(slot_id, param);
-    }
-    win->unlock();
-
-    return 0;
-}
-
 int window::start_with_id(int window_id)
 {
     this->lock();
@@ -391,197 +298,6 @@ int window::start_with_id(int window_id)
         this->unlock();
         return window_is_running;
     }
-    return 0;
-}
-
-static void
-show_window(lua_State* L, window* win)
-{
-    int window_id = window_index_add(L, -1);
-    int status = win->start_with_id(window_id);
-    if (status == window_is_running) {
-        luaL_error (L, "window is already active (reported during window creation)");
-    } else if (status == window_cannot_start_thread) {
-        luaL_error (L, "error during thread creation (reported during window creation)");
-    }
-    if (status != 0) {
-        window_index_remove(L, window_id);
-    }
-}
-
-static int
-window_is_closed(lua_State *L)
-{
-    window *win = object_cast<window>(L, 1, GS_WINDOW);
-    if (win && win->status == canvas_window::closed) {
-        lua_pushboolean(L, 1);
-    } else {
-        lua_pushboolean(L, 0);
-    }
-    return 1;
-}
-
-int
-window_new (lua_State *L)
-{
-    lua_pushcfunction(L, window_is_closed);
-    window_index_remove_fun(L);
-
-    const char *spec = lua_tostring (L, 1);
-    int defer_show = (lua_gettop(L) >= 2 ? lua_toboolean(L, 2) : 0);
-
-    window *win = push_new_object<window>(L, GS_WINDOW);
-
-    if (spec)
-    {
-        if (!win->split(spec))
-            return luaL_error(L, "invalid layout specification");
-    }
-
-    if (!defer_show)
-    {
-        show_window(L, win);
-    }
-
-    return 1;
-}
-
-int
-window_show (lua_State *L)
-{
-    window *win = object_check<window>(L, 1, GS_WINDOW);
-    show_window(L, win);
-    return 0;
-}
-
-int
-window_free (lua_State *L)
-{
-    window *win = object_check<window>(L, 1, GS_WINDOW);
-    win->~window();
-    return 0;
-}
-
-int
-window_split (lua_State *L)
-{
-    window *win = object_check<window>(L, 1, GS_WINDOW);
-    const char *spec = luaL_checkstring (L, 2);
-
-    win->lock();
-
-    refs_remove_function refs_remove_func(L, 1);
-    win->plot_apply(refs_remove_func);
-
-    if (! win->split(spec))
-    {
-        if (win->status == canvas_window::running)
-            win->do_window_update();
-        win->unlock();
-        return luaL_error(L, "invalid window subdivision specification");
-    }
-
-    if (win->status == canvas_window::running)
-    {
-        win->on_draw();
-        win->do_window_update();
-    }
-
-    win->unlock();
-    return 0;
-}
-
-int
-window_attach (lua_State *L)
-{
-    window *win = object_check<window>(L, 1, GS_WINDOW);
-    sg_plot* plot = object_check<sg_plot>(L, 2, GS_PLOT);
-    const char *spec = luaL_checkstring (L, 3);
-
-    win->lock();
-
-    int slot_id = win->attach (plot, spec);
-
-    if (slot_id >= 0)
-    {
-        if (win->status == canvas_window::running)
-            win->draw_slot(slot_id, true);
-        win->unlock();
-        window_refs_add (L, slot_id, 1, 2);
-    }
-    else
-    {
-        win->unlock();
-        luaL_error (L, "invalid slot specification");
-    }
-
-    return 0;
-}
-
-int
-window_slot_update (lua_State *L)
-{
-    return window_generic_oper_ext (L, &window::draw_slot, true);
-}
-
-int
-window_slot_refresh (lua_State *L)
-{
-    return window_generic_oper_ext (L, &window::draw_slot, false);
-}
-
-int
-window_update (lua_State *L)
-{
-    window *win = object_check<window>(L, 1, GS_WINDOW);
-
-    win->lock();
-    if (win->status == canvas_window::running)
-    {
-        win->on_draw();
-        win->do_window_update();
-    }
-    win->unlock();
-
-    return 0;
-}
-
-int
-window_save_slot_image (lua_State *L)
-{
-    return window_generic_oper (L, &window::save_slot_image);
-}
-
-int
-window_restore_slot_image (lua_State *L)
-{
-    return window_generic_oper (L, &window::restore_slot_image);
-}
-
-int
-window_close (lua_State *L)
-{
-    window *win = object_check<window>(L, 1, GS_WINDOW);
-    win->lock();
-    if (win->status == canvas_window::running)
-        win->close_request();
-    win->unlock();
-    return 0;
-}
-
-int
-window_close_wait (lua_State *L)
-{
-    window *win = object_check<window>(L, 1, GS_WINDOW);
-    win->shutdown_close(true);
-    return 0;
-}
-
-int
-window_wait (lua_State *L)
-{
-    window *win = object_check<window>(L, 1, GS_WINDOW);
-    win->shutdown_close(false);
     return 0;
 }
 
@@ -615,66 +331,10 @@ private:
     double m_width, m_height;
 };
 
-static int
-window_save_svg_try(lua_State *L)
+void window::save_svg(FILE *f, double w, double h)
 {
-    window *win = object_check<window>(L, 1, GS_WINDOW);
-    const char *filename = lua_tostring(L, 2);
-    const double w = luaL_optnumber(L, 3, 600.0);
-    const double h = luaL_optnumber(L, 4, 600.0);
-
-    if (!filename) return type_error_return(L, 2, "string");
-
-    unsigned fnlen = strlen(filename);
-    if (fnlen <= 4 || strcmp(filename + (fnlen - 4), ".svg") != 0)
-    {
-        const char* basename = (fnlen > 0 ? filename : "unnamed");
-        lua_pushfstring(L, "%s.svg", basename);
-        filename = lua_tostring(L, -1);
-    }
-
-    FILE* f = fopen(filename, "w");
-    if (!f)
-    {
-        lua_pushfstring(L, "cannot open filename: %s", filename);
-        return (-1);
-    }
-
     svg_writer svg_writer(f, w, h);
     svg_writer.write_header();
-    win->plot_apply(svg_writer);
+    this->plot_apply(svg_writer);
     svg_writer.write_end();
-    fclose(f);
-
-    return 0;
-}
-
-int
-window_save_svg(lua_State *L)
-{
-    int nret = window_save_svg_try(L);
-    if (nret < 0) return lua_error(L);
-    return nret;
-}
-
-struct window_hooks nat_window_hooks[1] = {{
-        window_new, window_show, window_attach,
-        window_slot_update, window_slot_refresh,
-        window_close_wait, window_wait,
-        window_save_slot_image, window_restore_slot_image
-    }
-};
-
-void
-natwin_register(lua_State *L)
-{
-    app_window_hooks = nat_window_hooks;
-
-    luaL_newmetatable (L, GS_METATABLE(GS_WINDOW));
-    lua_pushvalue (L, -1);
-    lua_setfield (L, -2, "__index");
-    luaL_register (L, NULL, window_methods);
-    lua_pop (L, 1);
-
-    luaL_register (L, NULL, window_functions);
 }

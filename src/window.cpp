@@ -1,5 +1,5 @@
 #include "window.h"
-#include "lua-plot-cpp.h"
+#include "sg_plot.h"
 #include "platform_support_ext.h"
 
 void window::ref::compose(bmatrix& a, const bmatrix& b)

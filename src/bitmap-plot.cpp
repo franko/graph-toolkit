@@ -6,7 +6,7 @@ extern "C" {
 
 #include "bitmap-plot.h"
 #include "lua-cpp-utils.h"
-#include "lua-plot-cpp.h"
+#include "sg_plot.h"
 #include "gs-types.h"
 #include "canvas.h"
 #include "colors.h"

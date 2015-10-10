@@ -24,7 +24,7 @@ extern "C" {
 }
 
 #include "lua-plot.h"
-#include "lua-plot-cpp.h"
+#include "sg_plot.h"
 #include "window_hooks.h"
 #include "lua-graph.h"
 #include "lua-cpp-utils.h"

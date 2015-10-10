@@ -2,7 +2,7 @@
 #define AGGPLOT_WINDOW_H
 
 #include "canvas-window-cpp.h"
-#include "lua-plot-cpp.h"
+#include "sg_plot.h"
 #include "split-parser.h"
 #include "lua-graph.h"
 #include "tree.h"

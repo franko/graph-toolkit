@@ -1,6 +1,8 @@
 #include <unistd.h>
 
 #include "window.h"
+#include "fonts.h"
+#include "plot-auto.h"
 #include "path.h"
 
 static double my_fun_s(double x) { return (x*x + 0.2) * sin(x * 30); }
@@ -25,13 +27,13 @@ int main()
     if (status != init_fonts_success) return 1;
 
     window *win = new window();
-    plot *p = new plot_auto();
+    plot_auto *p = new plot_auto();
     draw::path *line = build_curve(my_fun_s, -1.0, 1.0, 256);
     sg_object *sline = new trans::scaling(line);
     agg::rgba8 red(190,10,10,255);
     p->add(sline, red, true);
     p->commit_pending_draw();
-    int slot_id = win->attach(p, "");
+    int slot_id = win->attach(new drawing_adapter<plot_auto>(*p), "");
     win->start_with_id(1);
 
     sleep(2);

@@ -10,6 +10,7 @@ extern "C" {
 #include "window.h"
 #include "window_registry.h"
 #include "lua-cpp-utils.h"
+#include "sg_plot.h"
 #include "gs-types.h"
 #include "split-parser.h"
 #include "lua-utils.h"
@@ -188,7 +189,8 @@ window_attach (lua_State *L)
 
     win->lock();
 
-    int slot_id = win->attach (plot, spec);
+    drawing_adapter<sg_plot> *pdrawing = new drawing_adapter<sg_plot>(*plot);
+    int slot_id = win->attach(pdrawing, spec);
 
     if (slot_id >= 0)
     {

@@ -1,5 +1,4 @@
 #include "window.h"
-#include "sg_plot.h"
 #include "platform_support_ext.h"
 
 void window::ref::compose(bmatrix& a, const bmatrix& b)
@@ -252,7 +251,7 @@ next_int (const char *str, int& val)
 }
 
 /* Returns the slot_id or -1 in case of error. */
-int window::attach(sg_plot* plot, const char *spec)
+int window::attach(drawing* plot, const char *spec)
 {
     ref::node *n = m_tree;
     const char *ptr;
@@ -313,7 +312,7 @@ public:
     void call(window::ref* ref)
     {
         char plot_name[64];
-        sg_plot* p = ref->plot;
+        drawing* p = ref->plot;
         if (p)
         {
             agg::trans_affine mtx = ref->matrix;

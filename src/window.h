@@ -2,12 +2,11 @@
 #define AGGPLOT_WINDOW_H
 
 #include "canvas-window-cpp.h"
-#include "sg_plot.h"
+#include "drawing.h"
 #include "split-parser.h"
 #include "lua-graph.h"
 #include "tree.h"
-#include "plot.h"
-#include "rect.h"
+#include "colors.h"
 #include "list.h"
 
 #include "agg_color_rgba.h"
@@ -27,7 +26,7 @@ public:
     struct ref {
         typedef tree::node<ref, direction_e> node;
 
-        sg_plot* plot;
+        drawing* plot;
         int slot_id;
 
         plot_render_info inf;
@@ -39,11 +38,14 @@ public:
         bool valid_rect;
         opt_rect<double> dirty_rect;
 
-        ref(sg_plot* p = 0)
-            : plot(p), matrix(), layer_buf(0), valid_rect(true), dirty_rect()
+        ref(drawing* p = 0):
+            plot(p), matrix(), layer_buf(0), valid_rect(true), dirty_rect()
         {};
 
-        ~ref() { delete[] layer_buf; }
+        ~ref() {
+            delete plot;
+            delete[] layer_buf;
+        }
 
         void dispose_buffer()
         {
@@ -91,7 +93,7 @@ public:
     template <class Function> void plot_apply(Function& f) { this->plot_apply_rec(f, m_tree); }
 
     bool split(const char *spec);
-    int attach(sg_plot *plot, const char *spec);
+    int attach(drawing *plot, const char *spec);
     void draw_slot(int slot_id, bool update_req);
     void refresh_slot(int slot_id);
     int start_with_id(int window_id);

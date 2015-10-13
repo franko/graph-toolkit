@@ -27,10 +27,10 @@
 #include "list.h"
 #include "strpp.h"
 #include "canvas.h"
+#include "drawing.h"
 #include "units.h"
 #include "resource-manager.h"
 #include "colors.h"
-#include "rect.h"
 #include "canvas_svg.h"
 #include "trans.h"
 #include "text.h"
@@ -102,10 +102,6 @@ struct plot_layout {
     agg::trans_affine legend_area[4];
     agg::trans_affine plot_area;
     agg::trans_affine plot_active_area;
-};
-
-struct plot_render_info {
-    agg::trans_affine active_area;
 };
 
 struct plot_item {

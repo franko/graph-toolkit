@@ -33,7 +33,8 @@ int main()
     agg::rgba8 red(190,10,10,255);
     p->add(sline, red, true);
     p->commit_pending_draw();
-    int slot_id = win->attach(new drawing_adapter<plot_auto>(*p), "");
+    int slot_id = 0;
+    win->attach(new drawing_adapter<plot_auto>(*p), slot_id);
     win->start_with_id(1);
 
     sleep(2);

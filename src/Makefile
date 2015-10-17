@@ -149,6 +149,7 @@ PLOT_CPPSRC_FILES = gamma.cpp printf_check.cpp utils.cpp \
 	colors.cpp markers.cpp draw_svg.cpp canvas_svg.cpp lua-draw.cpp\
 	lua-text.cpp text.cpp agg-parse-trans.cpp lua-plot.cpp \
 	bitmap-plot.cpp lua-graph.cpp canvas-window.cpp window.cpp \
+	split_area.cpp \
 	window_lua.cpp
 PLOT_OBJ_FILES := $(PLOT_CSRC_FILES:%.c=%.o) $(PLOT_CPPSRC_FILES:%.cpp=%.o)
 

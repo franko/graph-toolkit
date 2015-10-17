@@ -15,6 +15,7 @@ extern "C" {
 #include "split-parser.h"
 #include "lua-utils.h"
 #include "window_hooks.h"
+#include "split_area.h"
 
 __BEGIN_DECLS
 
@@ -40,10 +41,11 @@ static const struct luaL_Reg window_methods[] = {
 
 __END_DECLS
 
-
-struct refs_remove_function {
-    refs_remove_function(lua_State *_L, int k): L(_L), window_index(k) {}
-    void call(window::ref* ref) { if (ref->plot) window_refs_remove(L, ref->slot_id, window_index); }
+struct refs_remove_visitor {
+    refs_remove_visitor(lua_State *_L, int k): L(_L), window_index(k) {}
+    void drawing(drawing *d, int i) {
+        window_refs_remove(L, i, window_index);
+    }
     lua_State* L;
     int window_index;
 };
@@ -110,6 +112,18 @@ window_is_closed(lua_State *L)
     return 1;
 }
 
+static bool split_window(window *win, const char *spec)
+{
+    agg::pod_bvector<agg::trans_affine> areas;
+    if (!build_split_regions(areas, spec)) {
+        return false;
+    }
+    for (unsigned k = 0; k < areas.size(); k++) {
+        win->add_drawing_area(areas[k]);
+    }
+    return true;
+}
+
 int
 window_new (lua_State *L)
 {
@@ -120,18 +134,14 @@ window_new (lua_State *L)
     int defer_show = (lua_gettop(L) >= 2 ? lua_toboolean(L, 2) : 0);
 
     window *win = push_new_object<window>(L, GS_WINDOW);
-
-    if (spec)
-    {
-        if (!win->split(spec))
+    if (spec) {
+        if (!split_window(win, spec)) {
             return luaL_error(L, "invalid layout specification");
+        }
     }
-
-    if (!defer_show)
-    {
+    if (!defer_show) {
         show_window(L, win);
     }
-
     return 1;
 }
 
@@ -159,11 +169,10 @@ window_split (lua_State *L)
 
     win->lock();
 
-    refs_remove_function refs_remove_func(L, 1);
-    win->plot_apply(refs_remove_func);
+    refs_remove_visitor refs_remove(L, 1);
+    win->accept(refs_remove);
 
-    if (! win->split(spec))
-    {
+    if (!split_window(win, spec)) {
         if (win->status == canvas_window::running)
             win->do_window_update();
         win->unlock();
@@ -185,26 +194,19 @@ window_attach (lua_State *L)
 {
     window *win = object_check<window>(L, 1, GS_WINDOW);
     sg_plot* plot = object_check<sg_plot>(L, 2, GS_PLOT);
-    const char *spec = luaL_checkstring (L, 3);
+    int slot_id = (lua_gettop(L) > 2 ? lua_tointeger(L, 3) : 0);
 
     win->lock();
-
     drawing_adapter<sg_plot> *pdrawing = new drawing_adapter<sg_plot>(*plot);
-    int slot_id = win->attach(pdrawing, spec);
-
-    if (slot_id >= 0)
-    {
+    if (win->attach(pdrawing, slot_id)) {
         if (win->status == canvas_window::running)
             win->draw_slot(slot_id, true);
         win->unlock();
-        window_refs_add (L, slot_id, 1, 2);
-    }
-    else
-    {
+        window_refs_add(L, slot_id, 1, 2);
+    } else {
         win->unlock();
-        luaL_error (L, "invalid slot specification");
+        luaL_error(L, "invalid slot specification");
     }
-
     return 0;
 }
 

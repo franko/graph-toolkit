@@ -18,7 +18,7 @@ class window : public canvas_window {
 public:
     int window_id;
 
-    struct ref {
+    struct drawing_area {
         drawing* plot;
 
         plot_render_info inf;
@@ -30,11 +30,11 @@ public:
         bool valid_rect;
         opt_rect<double> dirty_rect;
 
-        ref(drawing* p = 0):
+        drawing_area(drawing* p = 0):
             plot(p), matrix(), layer_buf(0), valid_rect(true), dirty_rect()
         {};
 
-        ~ref() {
+        ~drawing_area() {
             delete plot;
             delete[] layer_buf;
         }
@@ -51,10 +51,10 @@ public:
     };
 
 private:
-    void draw_slot_by_ref(ref& ref, bool dirty);
-    void refresh_slot_by_ref(ref& ref, bool draw_all);
+    void draw_area(drawing_area& drawing_area, bool dirty);
+    void draw_area_queue(drawing_area& drawing_area, bool draw_all);
 
-    agg::pod_bvector<ref*> m_drawing_areas;
+    agg::pod_bvector<drawing_area*> m_drawing_areas;
 
 public:
     window(agg::rgba8 bgcol= colors::white):
@@ -97,7 +97,7 @@ public:
     void save_svg(FILE *f, double w, double h);
 
 private:
-    ref *get_drawing_area(int i);
+    drawing_area *get_drawing_area(int i);
 };
 
 #endif

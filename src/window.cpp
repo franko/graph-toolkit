@@ -1,7 +1,7 @@
 #include "window.h"
 #include "platform_support_ext.h"
 
-window::ref *window::get_drawing_area(int i)
+window::drawing_area *window::get_drawing_area(int i)
 {
     if (i >= 0 && unsigned(i) < m_drawing_areas.size()) {
         return m_drawing_areas[i];
@@ -10,7 +10,7 @@ window::ref *window::get_drawing_area(int i)
 }
 
 void
-window::ref::save_image (agg::rendering_buffer& win_buf,
+window::drawing_area::save_image (agg::rendering_buffer& win_buf,
                          agg::rect_base<int>& r,
                          int img_bpp, bool flip_y)
 {
@@ -30,18 +30,18 @@ window::ref::save_image (agg::rendering_buffer& win_buf,
     }
 }
 
-void window::draw_slot_by_ref(window::ref& ref, bool draw_image)
+void window::draw_area(window::drawing_area& drawing_area, bool draw_image)
 {
-    agg::trans_affine mtx(ref.matrix);
+    agg::trans_affine mtx(drawing_area.matrix);
     this->scale(mtx);
 
     agg::rect_base<int> r = rect_of_slot_matrix<int>(mtx);
     m_canvas->clear_box(r);
 
-    if (ref.plot)
+    if (drawing_area.plot)
     {
         AGG_LOCK();
-        ref.plot->draw(*m_canvas, mtx, &ref.inf);
+        drawing_area.plot->draw(*m_canvas, mtx, &drawing_area.inf);
         AGG_UNLOCK();
     }
 
@@ -52,44 +52,44 @@ void window::draw_slot_by_ref(window::ref& ref, bool draw_image)
 void
 window::draw_slot(int slot_id, bool clean_req)
 {
-    ref *ref = get_drawing_area(slot_id);
-    if (ref && m_canvas) {
-        bool redraw = clean_req || ref->plot->need_redraw();
+    drawing_area *drawing_area = get_drawing_area(slot_id);
+    if (drawing_area && m_canvas) {
+        bool redraw = clean_req || drawing_area->plot->need_redraw();
         if (redraw) {
-            draw_slot_by_ref(*ref, false);
-            ref->dispose_buffer();
+            draw_area(*drawing_area, false);
+            drawing_area->dispose_buffer();
         }
-        refresh_slot_by_ref(*ref, redraw);
-        ref->valid_rect = true;
+        draw_area_queue(*drawing_area, redraw);
+        drawing_area->valid_rect = true;
     }
 }
 
 void
 window::save_slot_image(int slot_id)
 {
-    ref *ref = get_drawing_area(slot_id);
-    if (ref != 0) {
-        agg::trans_affine mtx(ref->matrix);
+    drawing_area *drawing_area = get_drawing_area(slot_id);
+    if (drawing_area != 0) {
+        agg::trans_affine mtx(drawing_area->matrix);
         this->scale(mtx);
         agg::rect_base<int> r = rect_of_slot_matrix<int>(mtx);
-        ref->save_image(this->rbuf_window(), r, this->bpp(), this->flip_y());
+        drawing_area->save_image(this->rbuf_window(), r, this->bpp(), this->flip_y());
     }
 }
 
 void
 window::restore_slot_image(int slot_id)
 {
-    ref *ref = get_drawing_area(slot_id);
-    if (ref != 0) {
-        agg::trans_affine mtx(ref->matrix);
+    drawing_area *drawing_area = get_drawing_area(slot_id);
+    if (drawing_area != 0) {
+        agg::trans_affine mtx(drawing_area->matrix);
         this->scale(mtx);
         agg::rect_base<int> r = rect_of_slot_matrix<int>(mtx);
-        if (ref->layer_buf == 0) {
+        if (drawing_area->layer_buf == 0) {
             m_canvas->clear_box(r);
-            draw_slot_by_ref (*ref, false);
-            ref->save_image(this->rbuf_window(), r, this->bpp(), this->flip_y());
+            draw_area(*drawing_area, false);
+            drawing_area->save_image(this->rbuf_window(), r, this->bpp(), this->flip_y());
         } else {
-            agg::rendering_buffer& img = ref->layer_img;
+            agg::rendering_buffer& img = drawing_area->layer_img;
             agg::rendering_buffer& win = this->rbuf_window();
             rendering_buffer_put_region (win, img, r, this->bpp() / 8);
         }
@@ -97,22 +97,22 @@ window::restore_slot_image(int slot_id)
 }
 
 void
-window::refresh_slot_by_ref(ref& ref, bool draw_all)
+window::draw_area_queue(drawing_area& drawing_area, bool draw_all)
 {
-    agg::trans_affine mtx(ref.matrix);
+    agg::trans_affine mtx(drawing_area.matrix);
     this->scale(mtx);
 
     opt_rect<double> rect;
 
-    if (!ref.valid_rect || draw_all)
+    if (!drawing_area.valid_rect || draw_all)
         rect.set(rect_of_slot_matrix<double>(mtx));
 
     AGG_LOCK();
     opt_rect<double> draw_rect;
-    ref.plot->draw_queue(*m_canvas, mtx, ref.inf, draw_rect);
+    drawing_area.plot->draw_queue(*m_canvas, mtx, drawing_area.inf, draw_rect);
     rect.add<rect_union>(draw_rect);
-    rect.add<rect_union>(ref.dirty_rect);
-    ref.dirty_rect = draw_rect;
+    rect.add<rect_union>(drawing_area.dirty_rect);
+    drawing_area.dirty_rect = draw_rect;
     AGG_UNLOCK();
 
     if (rect.is_defined())
@@ -129,7 +129,7 @@ window::on_draw()
 {
     if (m_canvas) {
         for (unsigned i = 0; i < m_drawing_areas.size(); i++) {
-            draw_slot_by_ref(*m_drawing_areas[i], false);
+            draw_area(*m_drawing_areas[i], false);
         }
     }
 }
@@ -145,7 +145,7 @@ window::on_resize(int sx, int sy)
 
 bool window::attach(drawing* plot, int slot_id)
 {
-    ref *r = get_drawing_area(slot_id);
+    drawing_area *r = get_drawing_area(slot_id);
     if (r) {
         r->plot = plot;
     }
@@ -160,7 +160,7 @@ void window::clear_drawing_areas() {
 
 void window::add_drawing_area(const agg::trans_affine& m)
 {
-    ref *r = new ref();
+    drawing_area *r = new drawing_area();
     r->matrix = m;
     m_drawing_areas.add(r);
 }
@@ -191,13 +191,13 @@ public:
     void write_header() { m_canvas.write_header(m_width, m_height); }
     void write_end() { m_canvas.write_end(); }
 
-    void call(window::ref* ref, unsigned i)
+    void call(window::drawing_area* drawing_area, unsigned i)
     {
         char plot_name[64];
-        drawing* p = ref->plot;
+        drawing* p = drawing_area->plot;
         if (p)
         {
-            agg::trans_affine mtx = ref->matrix;
+            agg::trans_affine mtx = drawing_area->matrix;
             agg::trans_affine_scaling scale(m_width, m_height);
             trans_affine_compose(mtx, scale);
             sprintf(plot_name, "plot%u", i);

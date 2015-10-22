@@ -1,30 +1,16 @@
+include ../src/makeconfig
+include ../src/makedefs
+include ../src/makegraphdefs
 
 TESTS_C_SRC_FILES =
 TESTS_CPP_SRC_FILES = plot1.cpp
 TESTS_EXE_FILES := $(TESTS_CPP_SRC_FILES:%.cpp=%) $(TESTS_C_SRC_FILES:%.cpp=%)
 
-X11_INCLUDES = $(shell pkg-config x11 --cflags)
-X11_LIBS = $(shell pkg-config x11 --libs)
+PROJECT_INCLUDES = -I../src -I../src/core -I../src/str
+PROJECT_LIBS = ../src/core/libgraph.a ../src/str/libstr.a
 
-AGG_INCLUDES = $(shell pkg-config libagg --cflags)
-AGG_LIBS = $(shell pkg-config libagg --libs)
-
-FREETYPE_INCLUDES = $(shell pkg-config freetype2 --cflags)
-FREETYPE_LIBS = $(shell pkg-config freetype2 --libs)
-
-LUA_INCLUDES = $(shell pkg-config --cflags luajit)
-LUA_LIBS = $(shell pkg-config --libs luajit)
-
-INCLUDES = -I../src $(LUA_INCLUDES) $(X11_INCLUDES) $(AGG_INCLUDES) $(FREETYPE_INCLUDES)
-
-CC = gcc
-CXX = g++
-
-CFLAGS = -g -Wall
-CXXFLAGS = -g -Wall
-
-CXXCOMPILE = $(CXX) $(CXXFLAGS) $(INCLUDES)
-COMPILE = $(CC) $(CFLAGS) $(INCLUDES)
+INCLUDES = $(PROJECT_INCLUDES) $(X11_INCLUDES) $(AGG_INCLUDES) $(FREETYPE_INCLUDES)
+LIBS += $(FREETYPE_LIBS) $(AGG_LIBS) $(X11_LIBS) $(PTHREAD_LIBS)
 
 all: $(TESTS_EXE_FILES)
 
@@ -33,29 +19,14 @@ DEP_FILES := $(TESTS_CPP_SRC_FILES:%.cpp=.deps/%.P) $(TESTS_C_SRC_FILES:%.c=.dep
 DEPS_MAGIC := $(shell mkdir .deps > /dev/null 2>&1 || :)
 
 clean:
-	rm -fr *.o
+	rm -fr *.o $(TESTS_EXE_FILES)
 
 %: %.o
-	$(CC) -o $@ $< -L../src -lgraphcore -lm
+	$(E) compiling $@
+	$(Q)$(CXX) -o $@ $< $(PROJECT_LIBS) $(LIBS) -lm
 
-%.o: %.cpp
-	@echo Compiling $<
-	$(CXXCOMPILE) -Wp,-MMD,.deps/$(*F).pp -c $<
-	@-cp .deps/$(*F).pp .deps/$(*F).P; \
-	tr ' ' '\012' < .deps/$(*F).pp \
-          | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
-            >> .deps/$(*F).P; \
-	rm .deps/$(*F).pp
+include ../src/makerules
 
-%.o: %.c
-	@echo Compiling $<
-	@$(COMPILE) -Wp,-MMD,.deps/$(*F).pp -c $<
-	@-cp .deps/$(*F).pp .deps/$(*F).P; \
-	tr ' ' '\012' < .deps/$(*F).pp \
-          | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
-            >> .deps/$(*F).P; \
-	rm .deps/$(*F).pp
-
-.PHONY: clean
+.PHONY: all clean
 
 -include $(DEP_FILES)

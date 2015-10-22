@@ -2,7 +2,7 @@
 #include <string.h>
 
 #include "lua-cpp-utils.h"
-#include "colors.h"
+#include "lua-colors.h"
 
 static agg::rgba8
 rgba8_lookup (lua_State *L, const char *color_str)
@@ -69,8 +69,3 @@ color_arg_lookup (lua_State *L, int index)
 
     return rgba8_lookup (L, cstr);
 }
-
-agg::rgba8 colors::white(0xff, 0xff, 0xff);
-agg::rgba8 colors::black(0, 0, 0);
-
-agg::rgba8 colors::cdefault(180, 0, 0, 255);

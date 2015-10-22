@@ -1,0 +1,55 @@
+
+# Defines the commands to compile, link and create a library archive.
+# Defines also compiler flags that should be used across the
+# project.
+
+AR = ar rcu
+RANLIB = ranlib
+
+CC = gcc
+CXX = g++
+
+ifneq (,$(findstring Windows,$(OS)))
+  HOST_SYS= Windows
+else
+  HOST_SYS:= $(shell uname -s)
+  ifneq (,$(findstring CYGWIN,$(TARGET_SYS)))
+    HOST_SYS= Windows
+  endif
+endif
+
+ARCH := $(shell uname -m)
+
+ifeq ($(strip $(DEBUG)), yes)
+  CFLAGS += -g -Wall
+  CXXFLAGS += -g -Wall
+else
+  CFLAGS += -O2 -fomit-frame-pointer -ffast-math -Wall
+  CXXFLAGS += -O2 -fno-exceptions -ffast-math -fno-rtti -Wall
+endif
+
+ifeq ($(HOST_SYS),Windows)
+  DLLINK = gcc -static-libgcc -shared
+
+  LDFLAGS += -Wl,--enable-auto-import
+  LIBS += -L/usr/lib
+
+  DEFS += -DWIN32
+else
+  DLLINK = gcc -shared
+
+  ifeq ($(HOST_SYS),Darwin)
+    LINK_EXE = $(CXX) $(LDFLAGS)
+    LDFLAGS += -Wl,-E
+  endif
+endif
+
+# Ensure we define pthread flags to compile any files in
+# the project
+DEFS += -pthread -D_REENTRANT $(PTHREAD_DEFS)
+
+COMPILE = $(CC) $(CFLAGS) $(DEFS) $(INCLUDES)
+CXXCOMPILE = $(CXX) $(CXXFLAGS) $(DEFS) $(INCLUDES)
+
+Q= @
+E= @echo

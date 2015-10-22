@@ -44,11 +44,20 @@ struct window_hooks stub_window_hooks[1] = {{
     stub_window_fn,
 }};
 
-pthread_mutex_t agg_mutex[1];
-
 struct window_hooks *app_window_hooks = stub_window_hooks;
 
 static luaL_Reg dummy_entries[] = { {NULL, NULL} };
+
+static int initialize_fonts_lua(lua_State* L)
+{
+    int status = initialize_fonts();
+    if (status == init_fonts_not_found) {
+        luaL_error(L, "cannot find a suitable truetype font");
+    } else if (status == init_fonts_load_fail) {
+        luaL_error(L, "cannot load truetype font: %s", get_font_name());
+    }
+    return 0;
+}
 
 int
 luaopen_graphcore(lua_State *L)

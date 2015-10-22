@@ -1,15 +1,11 @@
-#ifndef LUA_GRAPH_H
-#define LUA_GRAPH_H
+#ifndef AGGPLOT_GRAPH_LOCKS_H
+#define AGGPLOT_GRAPH_LOCKS_H
 
 #include <pthread.h>
 
 #include "defs.h"
 
 __BEGIN_DECLS
-
-#include <lua.h>
-
-extern int luaopen_graphcore (lua_State *L);
 
 extern pthread_mutex_t agg_mutex[1];
 

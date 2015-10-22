@@ -3,7 +3,7 @@
 
 #include "canvas-window-cpp.h"
 #include "drawing.h"
-#include "lua-graph.h"
+#include "graph_locks.h"
 #include "colors.h"
 
 #include "agg_color_rgba.h"

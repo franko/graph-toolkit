@@ -84,6 +84,7 @@ static int canvas_new      (lua_State *L);
 
 static int   plot_add_gener  (lua_State *L, bool as_line);
 static void  plot_update_raw (lua_State *L, sg_plot *p, int plot_index);
+static int   bitmap_save_image (lua_State *L);
 
 static const struct luaL_Reg plot_functions[] = {
     {"plot",        plot_new},
@@ -145,6 +146,30 @@ static const struct luaL_Reg plot_properties_set[] = {
 };
 
 __END_DECLS
+
+int
+bitmap_save_image(lua_State *L)
+{
+    sg_plot *p = object_check<sg_plot>(L, 1, GS_PLOT);
+    const char *fn = luaL_checkstring (L, 2);
+    int w = luaL_optint (L, 3, 480), h = luaL_optint (L, 4, 480);
+
+    if (w <= 0 || w > 1024 * 8)
+        luaL_error (L, "width out of range");
+
+    if (h <= 0 || h > 1024 * 8)
+        luaL_error (L, "height out of range");
+
+    int status = bitmap_save_image(p, fn, w, h);
+    if (status == bitmap_plot_no_memory) {
+        return luaL_error (L, "Not enough memory in bitmap image save");
+    } else if (status == bitmap_plot_error_writing_file) {
+        return luaL_error (L, "Error writing file in bitmap image save");
+    } else if (status != 0) {
+        return luaL_error (L, "Unknown error in bitmap image save");
+    }
+    return 0;
+}
 
 static void
 configure_plot_env(lua_State* L, int index)

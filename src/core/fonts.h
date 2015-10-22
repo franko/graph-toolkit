@@ -3,7 +3,6 @@
 
 #include "defs.h"
 
-#include "lua.h"
 #include "agg_font_freetype.h"
 
 __BEGIN_DECLS
@@ -15,7 +14,6 @@ enum {
 };
 
 extern int initialize_fonts();
-extern int initialize_fonts_lua(lua_State* L);
 
 extern const char *get_font_name();
 extern const char *get_console_font_name();

@@ -7,6 +7,7 @@
 
 #include "pixel_fmt.h"
 #include "sg_object.h"
+#include "graph_locks.h"
 
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"

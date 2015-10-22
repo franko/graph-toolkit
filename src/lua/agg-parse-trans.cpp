@@ -14,8 +14,8 @@ extern "C" {
 #include "lua-cpp-utils.h"
 #include "lua-utils.h"
 #include "lua-draw.h"
+#include "lua-colors.h"
 #include "gs-types.h"
-#include "colors.h"
 
 #include "path.h"
 #include "text.h"

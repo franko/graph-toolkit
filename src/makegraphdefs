@@ -1,0 +1,36 @@
+ifeq ($(strip $(DISABLE_GAMMA_CORR)), yes)
+  DEFS += -DDISABLE_GAMMA_CORR
+endif
+
+ifeq ($(strip $(DISABLE_SUBPIXEL_LCD)), yes)
+  DEFS += -DDISABLE_SUBPIXEL_AA
+endif
+
+PTHREAD_LIBS = -lpthread
+
+ifeq ($(HOST_SYS),Windows)
+  USER_LIBS_HOME = C:/fra/local
+  USER_INCLUDE = $(USER_LIBS_HOME)/include
+
+  INCLUDES += -I$(USER_INCLUDE) -I/usr/include -I/usr/pthreads-w32/include
+  LIBS += -L$(USER_LIBS_HOME)/lib
+
+  AGG_INCLUDES = -I$(USER_INCLUDE)/agg2
+  AGG_LIBS = -lagg -lgdi32
+
+  FREETYPE_INCLUDES = -I$(USER_INCLUDE)/freetype
+  FREETYPE_LIBS = -lfreetype
+else
+  X11_INCLUDES = $(shell pkg-config x11 --cflags)
+  X11_LIBS = $(shell pkg-config x11 --libs)
+
+# GWH (for OS X): pkg-config will include "-Wl,-rpath,/opt/local/lib" in AGG_LIBS.
+# If you don't include that, the code won't run unless you first do:
+#   export DYLD_FALLBACK_LIBRARY_PATH=/opt/local/lib
+
+  AGG_INCLUDES = $(shell pkg-config libagg --cflags)
+  AGG_LIBS = $(shell pkg-config libagg --libs)
+
+  FREETYPE_INCLUDES = $(shell pkg-config freetype2 --cflags)
+  FREETYPE_LIBS = $(shell pkg-config freetype2 --libs)
+endif

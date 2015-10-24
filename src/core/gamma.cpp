@@ -1,7 +1,7 @@
-#include "agg-pixfmt-config.h"
+#include "gamma.h"
 
 #ifndef DISABLE_GAMMA_CORR
-gslshell::gamma_type gslshell::gamma(1.5);
+gamma_type sys_gamma(1.5);
 #endif
 // Original values for the subpixel color filter. These are quite conservative
 // to avoid color fringes.
@@ -9,4 +9,4 @@ gslshell::gamma_type gslshell::gamma(1.5);
 
 // Slightly more agressive values with more weight to primary channel.
 // Some people may notice colorer fringes but fonts looks sharper.
-agg::lcd_distribution_lut gslshell::subpixel_lut(0.448, 0.184, 0.092);
+agg::lcd_distribution_lut subpixel_lut(0.448, 0.184, 0.092);

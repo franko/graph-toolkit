@@ -26,7 +26,7 @@ int main()
     int status = initialize_fonts();
     if (status != init_fonts_success) return 1;
 
-    window *win = new window();
+    window *win = new window(agg::pix_format_rgb24);
     plot_auto *p = new plot_auto();
     draw::path *line = build_curve(my_fun_s, -1.0, 1.0, 256);
     sg_object *sline = new trans::scaling(line);

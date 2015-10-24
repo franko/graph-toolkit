@@ -37,7 +37,6 @@
 #include "pthreadpp.h"
 #include "agg_basics.h"
 #include "util/agg_color_conv_rgb8.h"
-#include "agg-pixfmt-config.h"
 #include "platform_support_ext.h"
 #include "rect.h"
 
@@ -117,9 +116,6 @@ public:
         return m_img;
     };
 };
-
-agg::pix_format_e gslshell::sys_pixel_format = agg::pix_format_undefined;
-unsigned gslshell::sys_bpp = 0;
 
 buffer_image::buffer_image(unsigned bpp, unsigned byte_order,
                            unsigned width, unsigned height, x_connection *xc)
@@ -696,9 +692,6 @@ bool platform_support::init(unsigned width, unsigned height, unsigned flags)
         m_specific->close_connections();
         return false;
     }
-
-    gslshell::sys_pixel_format = m_specific->m_sys_format;
-    gslshell::sys_bpp = m_specific->m_sys_bpp;
 
     XSetWindowAttributes *win_attr = &m_specific->m_window_attributes;
 

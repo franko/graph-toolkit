@@ -133,7 +133,8 @@ window_new (lua_State *L)
     const char *spec = lua_tostring (L, 1);
     int defer_show = (lua_gettop(L) >= 2 ? lua_toboolean(L, 2) : 0);
 
-    window *win = push_new_object<window>(L, GS_WINDOW);
+    agg::pix_format_e pixel_format = agg::pix_format_rgb24;
+    window *win = push_new_object<window, agg::pix_format_e>(L, GS_WINDOW, pixel_format);
     if (spec) {
         if (!split_window(win, spec)) {
             return luaL_error(L, "invalid layout specification");

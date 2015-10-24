@@ -68,11 +68,14 @@ public:
 
     void close();
 
+    enum {
+        win32_pixel_format = agg::pix_format_bgr24,
+        win32_pixel_bpp = 24,
+    };
+
     pix_format_e  m_format;
-    pix_format_e  m_sys_format;
     bool          m_flip_y;
     unsigned      m_bpp;
-    unsigned      m_sys_bpp;
     HWND          m_hwnd;
     pixel_map     m_pmap_window;
     BITMAPINFO*   m_bmp_draw;
@@ -95,12 +98,11 @@ public:
 
 
 //------------------------------------------------------------------------
-platform_specific::platform_specific(pix_format_e format, bool flip_y) :
-    m_format(gslshell::pixel_format),
-    m_sys_format(gslshell::sys_pixel_format),
-    m_flip_y(gslshell::flip_y),
-    m_bpp(LIBGRAPH_BPP),
-    m_sys_bpp(gslshell::sys_bpp),
+// On Windows we always create window using BGR24 format.
+platform_specific::platform_specific(pix_format_e pixel_format, bool flip_y) :
+    m_format(pixel_format),
+    m_flip_y(flip_y),
+    m_bpp(24),
     m_hwnd(0),
     m_bmp_draw(0),
     m_cur_x(0),
@@ -139,14 +141,14 @@ void platform_specific::create_pmap(unsigned width,
     if (m_bmp_draw)
         delete [] (unsigned char*) m_bmp_draw;
     m_bmp_draw = pixel_map::create_bitmap_info(width, height,
-                 org_e(m_sys_bpp));
+                 org_e(win32_pixel_bpp));
 }
 
 //------------------------------------------------------------------------
 void platform_specific::display_pmap(HDC dc, const rendering_buffer* src,
                                      const agg::rect_base<int> *ri)
 {
-    if(m_sys_format == m_format && ri == 0)
+    if(win32_pixel_format == m_format && ri == 0)
     {
         m_pmap_window.draw(dc);
     }
@@ -169,13 +171,13 @@ void platform_specific::display_pmap(HDC dc, const rendering_buffer* src,
         rendering_buffer_ro src_view;
         rendering_buffer_get_const_view(src_view, *src, r, m_bpp / 8);
 
-        if (m_format == m_sys_format)
+        if (m_format == win32_pixel_format)
         {
             rbuf_tmp.copy_from(src_view);
         }
         else
         {
-            if (m_sys_format == pix_format_bgr24 && m_format == pix_format_rgb24)
+            if (win32_pixel_format == pix_format_bgr24 && m_format == pix_format_rgb24)
             {
                 my_color_conv(&rbuf_tmp, &src_view, color_conv_rgb24_to_bgr24());
             }
@@ -376,11 +378,6 @@ void platform_support::message(const char* msg)
 //------------------------------------------------------------------------
 bool platform_support::init(unsigned width, unsigned height, unsigned flags)
 {
-    if(m_specific->m_sys_format == pix_format_undefined)
-    {
-        return false;
-    }
-
     m_window_flags = flags;
 
     int wflags = CS_OWNDC | CS_VREDRAW | CS_HREDRAW;
@@ -583,9 +580,6 @@ void platform_support::on_ctrl_change() {}
 void platform_support::on_draw() {}
 void platform_support::on_post_draw(void* raw_handler) {}
 }
-
-agg::pix_format_e gslshell::sys_pixel_format = agg::pix_format_bgr24;
-unsigned gslshell::sys_bpp = 24;
 
 void
 platform_support_ext::prepare()

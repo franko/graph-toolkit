@@ -38,11 +38,18 @@ LUA_DLLPATH = $(DEST_PREFIX)/lib/lua/5.1
 DEBIAN = debian_build/$(PREFIX)
 WIN_INSTALL_DIR = windows_build
 
-all:
-	$(MAKE) -C src
+SUBDIRS = src tests
+
+all: $(SUBDIRS)
+tests: src
+
+$(SUBDIRS):
+	$(MAKE) -C $@
 
 clean:
-	$(MAKE) -C src clean
+	@for dir in $(SUBDIRS); do \
+		$(MAKE) -C $$dir clean; \
+	done
 
 install:
 	$(MAKE) -C src
@@ -80,4 +87,4 @@ win_install:
 	cp $(GRAPH_LUA_SRC) $(WIN_INSTALL_DIR)/lua/graph
 	cp -r examples $(WIN_INSTALL_DIR)
 
-.PHONY: clean all install debian win_install
+.PHONY: clean all install debian win_install $(SUBDIRS)

@@ -5,18 +5,6 @@ static double compute_scale(const agg::trans_affine& m)
     return m.scale() / 480.0;
 }
 
-static double
-std_line_width(double scale, double w = 1.0)
-{
-#if 0
-    const double dsf = M_LN10;
-    double ls = log(scale) / dsf;
-    return exp(round(ls) * dsf) * w * 1.5;
-#else
-    return w * 1.5;
-#endif
-}
-
 void plot::commit_pending_draw()
 {
     push_drawing_queue();
@@ -473,7 +461,6 @@ void plot::draw_axis(canvas_type& canvas, plot_layout& layout, const agg::rect_i
 
     agg::path_storage box;
     sg_object_gen<agg::conv_transform<agg::path_storage> > boxtr(box, m);
-    trans::stroke_a boxvs(&boxtr);
 
     box.move_to(0.0, 0.0);
     box.line_to(0.0, 1.0);
@@ -483,16 +470,13 @@ void plot::draw_axis(canvas_type& canvas, plot_layout& layout, const agg::rect_i
 
     agg::path_storage x_mark;
     sg_object_gen<agg::conv_transform<agg::path_storage> > x_mark_tr(x_mark, m);
-    trans::stroke_a x_mark_stroke(&x_mark_tr);
 
     agg::path_storage y_mark;
     sg_object_gen<agg::conv_transform<agg::path_storage> > y_mark_tr(y_mark, m);
-    trans::stroke_a y_mark_stroke(&y_mark_tr);
 
     agg::path_storage ln;
     sg_object_gen<agg::conv_transform<agg::path_storage> > ln_tr(ln, m);
     trans::dash_a lndash(&ln_tr);
-    trans::stroke_a lns(&lndash);
 
     const double label_text_size = get_default_font_size(text_axis_title, scale);
     const double plpad = double(axis_label_prop_space) / 1000.0;
@@ -571,17 +555,10 @@ void plot::draw_axis(canvas_type& canvas, plot_layout& layout, const agg::rect_i
 
     lndash.add_dash(7.0, 3.0);
 
-    lns.width(std_line_width(scale, 0.15));
-    canvas.draw(lns, colors::black);
-
-    x_mark_stroke.width(std_line_width(scale, 0.75));
-    canvas.draw(x_mark_stroke, colors::black);
-
-    y_mark_stroke.width(std_line_width(scale, 0.75));
-    canvas.draw(y_mark_stroke, colors::black);
-
-    boxvs.width(std_line_width(scale, 0.75));
-    canvas.draw(boxvs, colors::black);
+    canvas.draw_outline_alias(lndash, agg::rgba8(180, 180, 180));
+    canvas.draw_outline_alias(x_mark_tr, colors::black);
+    canvas.draw_outline_alias(y_mark_tr, colors::black);
+    canvas.draw_outline_alias(boxtr, colors::black);
 
     if (!str_is_null(&m_x_axis.title))
     {

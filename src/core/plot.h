@@ -60,6 +60,9 @@ public:
     virtual void draw_outline(sg_object& vs, agg::rgba8 c) {
         m_canvas->draw_outline(vs, c);
     }
+    virtual void draw_outline_alias(sg_object& vs, agg::rgba8 c) {
+        m_canvas->draw_outline_alias(vs, c);
+    }
 
     virtual void clip_box(const agg::rect_base<int>& clip) {
         m_canvas->clip_box(clip);

@@ -16,6 +16,8 @@
 #include "agg_renderer_scanline.h"
 #include "agg_trans_viewport.h"
 #include "agg_conv_stroke.h"
+#include "agg_renderer_primitives.h"
+#include "agg_rasterizer_outline.h"
 
 template <class Pixel>
 class renderer_gray_aa
@@ -157,7 +159,29 @@ private:
     agg::rgba8 m_bgcol;
 };
 
-template <class Renderer>
+template <class Pixel>
+class renderer_outline_alias
+{
+    typedef agg::renderer_base<Pixel> renderer_base;
+public:
+    renderer_outline_alias(agg::rendering_buffer& ren_buf):
+        m_pixbuf(ren_buf), m_ren_base(m_pixbuf), m_ren_prim(m_ren_base),
+        m_ras_outline(m_ren_prim)
+    { }
+
+    template <class VertexSource>
+    void draw_outline(VertexSource& vs, agg::rgba8 col) {
+        m_ren_prim.line_color(col);
+        m_ras_outline.add_path(vs);
+    }
+private:
+    Pixel m_pixbuf;
+    agg::renderer_base<Pixel> m_ren_base;
+    agg::renderer_primitives<renderer_base> m_ren_prim;
+    agg::rasterizer_outline<agg::renderer_primitives<renderer_base> > m_ras_outline;
+};
+
+template <class Renderer, class PixelSimple>
 class canvas_gen : public Renderer {
 
     typedef typename Renderer::pixfmt_type pixfmt_type;
@@ -166,11 +190,12 @@ class canvas_gen : public Renderer {
 
     agg::rasterizer_scanline_aa<> ras;
     agg::scanline_u8 sl;
+    renderer_outline_alias<PixelSimple> ren_al;
 
 public:
     canvas_gen(agg::rendering_buffer& ren_buf, double width, double height,
                agg::rgba8 bgcol):
-        Renderer(ren_buf, bgcol), ras(), sl()
+        Renderer(ren_buf, bgcol), ras(), sl(), ren_al(ren_buf)
     { }
 
     void draw(sg_object& vs, agg::rgba8 c)
@@ -179,6 +204,8 @@ public:
         this->color(c);
         this->render_scanlines(this->ras, this->sl);
     }
+
+    void draw_outline_alias(sg_object& vs, agg::rgba8 c) { ren_al.draw_outline(vs, c); }
 
     void draw_outline(sg_object& vs, agg::rgba8 c)
     {
@@ -194,6 +221,7 @@ public:
 struct virtual_canvas {
     virtual void draw(sg_object& vs, agg::rgba8 c) = 0;
     virtual void draw_outline(sg_object& vs, agg::rgba8 c) = 0;
+    virtual void draw_outline_alias(sg_object& vs, agg::rgba8 c) = 0;
 
     virtual void clip_box(const agg::rect_base<int>& clip) = 0;
     virtual void reset_clipping() = 0;
@@ -202,9 +230,9 @@ struct virtual_canvas {
 };
 
 #ifdef DISABLE_SUBPIXEL_AA
-typedef canvas_gen<renderer_gray_aa<pixel_type> > canvas;
+typedef canvas_gen<renderer_gray_aa<pixel_type>, pixel_simple> canvas;
 #else
-typedef canvas_gen<renderer_subpixel_aa<pixel_lcd_type> > canvas;
+typedef canvas_gen<renderer_subpixel_aa<pixel_lcd_type>, pixel_simple> canvas;
 #endif
 
 #endif

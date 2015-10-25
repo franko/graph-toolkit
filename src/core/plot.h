@@ -49,32 +49,6 @@
 #include "agg_conv_dash.h"
 #include "agg_gsv_text.h"
 
-template <class Canvas>
-class canvas_adapter : public virtual_canvas {
-public:
-    canvas_adapter(Canvas* c) : m_canvas(c) {}
-
-    virtual void draw(sg_object& vs, agg::rgba8 c) {
-        m_canvas->draw(vs, c);
-    }
-    virtual void draw_outline(sg_object& vs, agg::rgba8 c) {
-        m_canvas->draw_outline(vs, c);
-    }
-    virtual void draw_outline_alias(sg_object& vs, agg::rgba8 c) {
-        m_canvas->draw_outline_alias(vs, c);
-    }
-
-    virtual void clip_box(const agg::rect_base<int>& clip) {
-        m_canvas->clip_box(clip);
-    }
-    virtual void reset_clipping() {
-        m_canvas->reset_clipping();
-    }
-
-private:
-    Canvas* m_canvas;
-};
-
 struct plot_layout {
     struct point {
         point(double _x, double _y): x(_x), y(_y) {}

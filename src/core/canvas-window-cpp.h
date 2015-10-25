@@ -14,7 +14,7 @@
 
 class canvas_window : public platform_support_ext {
 protected:
-    canvas *m_canvas;
+    virtual_canvas *m_canvas;
     agg::rgba8 m_bgcolor;
 
     agg::trans_affine m_matrix;

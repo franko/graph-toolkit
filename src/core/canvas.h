@@ -219,6 +219,7 @@ public:
 };
 
 struct virtual_canvas {
+    virtual void clear_box(const agg::rect_base<int>& r) = 0;
     virtual void draw(sg_object& vs, agg::rgba8 c) = 0;
     virtual void draw_outline(sg_object& vs, agg::rgba8 c) = 0;
     virtual void draw_outline_alias(sg_object& vs, agg::rgba8 c) = 0;
@@ -227,6 +228,39 @@ struct virtual_canvas {
     virtual void reset_clipping() = 0;
 
     virtual ~virtual_canvas() { }
+};
+
+template <class Canvas, bool Owner = false>
+class canvas_adapter : public virtual_canvas {
+public:
+    canvas_adapter(Canvas* c) : m_canvas(c) {}
+
+    virtual ~canvas_adapter() {
+        if (Owner) delete m_canvas;
+    }
+
+    virtual void clear_box(const agg::rect_base<int>& r) {
+        m_canvas->clear_box(r);
+    }
+    virtual void draw(sg_object& vs, agg::rgba8 c) {
+        m_canvas->draw(vs, c);
+    }
+    virtual void draw_outline(sg_object& vs, agg::rgba8 c) {
+        m_canvas->draw_outline(vs, c);
+    }
+    virtual void draw_outline_alias(sg_object& vs, agg::rgba8 c) {
+        m_canvas->draw_outline_alias(vs, c);
+    }
+
+    virtual void clip_box(const agg::rect_base<int>& clip) {
+        m_canvas->clip_box(clip);
+    }
+    virtual void reset_clipping() {
+        m_canvas->reset_clipping();
+    }
+
+private:
+    Canvas* m_canvas;
 };
 
 #ifdef DISABLE_SUBPIXEL_AA

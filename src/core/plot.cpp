@@ -555,10 +555,12 @@ void plot::draw_axis(canvas_type& canvas, plot_layout& layout, const agg::rect_i
 
     lndash.add_dash(7.0, 3.0);
 
-    canvas.draw_outline_alias(lndash, agg::rgba8(180, 180, 180));
-    canvas.draw_outline_alias(x_mark_tr, colors::black);
-    canvas.draw_outline_alias(y_mark_tr, colors::black);
-    canvas.draw_outline_alias(boxtr, colors::black);
+    agg::rgba8 gray1(180, 180, 180), gray2(80, 80, 80);
+
+    canvas.draw_outline_alias(lndash, gray1);
+    canvas.draw_outline_alias(x_mark_tr, gray2);
+    canvas.draw_outline_alias(y_mark_tr, gray2);
+    canvas.draw_outline_alias(boxtr, gray2);
 
     if (!str_is_null(&m_x_axis.title))
     {

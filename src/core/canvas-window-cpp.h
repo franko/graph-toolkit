@@ -14,7 +14,8 @@
 
 class canvas_window : public platform_support_ext {
 protected:
-    virtual_canvas *m_canvas;
+    canvas *m_canvas;
+    render_type_e m_render_type;
     agg::rgba8 m_bgcolor;
 
     agg::trans_affine m_matrix;
@@ -33,9 +34,9 @@ public:
 
     enum win_status_e status;
 
-    canvas_window(agg::pix_format_e pixel_format, agg::rgba8 bgcol):
+    canvas_window(agg::pix_format_e pixel_format, render_type_e canvas_type, agg::rgba8 bgcol):
         platform_support_ext(pixel_format, true),
-        m_canvas(NULL), m_bgcolor(bgcol), m_matrix(), status(not_ready)
+        m_canvas(NULL), m_render_type(canvas_type), m_bgcolor(bgcol), m_matrix(), status(not_ready)
     { };
 
     virtual ~canvas_window()

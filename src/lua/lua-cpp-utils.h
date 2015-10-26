@@ -59,6 +59,12 @@ T* push_new_object (lua_State *L, enum gs_type_e tp, init_type& init)
     return new(L, tp) T(init);
 }
 
+template <class T, class init_type_1, class init_type_2>
+T* push_new_object (lua_State *L, enum gs_type_e tp, init_type_1& init1, init_type_2& init2)
+{
+    return new(L, tp) T(init1, init2);
+}
+
 template <class T>
 int object_free (lua_State *L, int index, enum gs_type_e tp)
 {

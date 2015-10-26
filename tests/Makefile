@@ -3,7 +3,7 @@ include ../src/makedefs
 include ../src/makegraphdefs
 
 TESTS_C_SRC_FILES =
-TESTS_CPP_SRC_FILES = plot1.cpp
+TESTS_CPP_SRC_FILES = plot1.cpp plot1_svg.cpp
 TESTS_EXE_FILES := $(TESTS_CPP_SRC_FILES:%.cpp=%) $(TESTS_C_SRC_FILES:%.cpp=%)
 
 PROJECT_INCLUDES = -I../src -I../src/core -I../src/str

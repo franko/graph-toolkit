@@ -9,6 +9,7 @@
 #include "defs.h"
 #include "strpp.h"
 #include "sg_object.h"
+#include "canvas.h"
 #include "draw_svg.h"
 
 static const char *svg_header =                                                \
@@ -23,38 +24,20 @@ static const char *svg_header =                                                \
 
 static const char *svg_end = "</svg>\n";
 
-class canvas_svg {
+class canvas_svg : public canvas {
+    enum { default_stroke_width = 1 };
+
 public:
     canvas_svg(FILE *f, double height):
         m_output(f), m_height(height), m_current_id(0)  { }
 
-    void clip_box(const agg::rect_base<int>& clip) { }
-    void reset_clipping() { }
-    void clear_box(const agg::rect_base<int>& r) { }
+    virtual void clip_box(const agg::rect_base<int>& clip) { }
+    virtual void reset_clipping() { }
+    virtual void clear_box(const agg::rect_base<int>& r) { }
 
-    template <class VertexSource>
-    void draw(VertexSource& vs, agg::rgba8 c)
-    {
-        str path;
-        svg_coords_from_vs(&vs, path, m_height);
-        str s = svg_fill_path(path, m_current_id++, c);
-        writeln(m_output, s, "   ");
-    }
-
-    template <class VertexSource>
-    void draw_outline(VertexSource& vs, agg::rgba8 c)
-    {
-        str path;
-        svg_coords_from_vs(&vs, path, m_height);
-        str s = svg_stroke_path(path, default_stroke_width, m_current_id++, c);
-        writeln(m_output, s, "   ");
-    }
-
-    template <class VertexSource>
-    void draw_outline_alias(VertexSource& vs, agg::rgba8 c)
-    {
-        draw_outline(vs, c);
-    }
+    virtual void draw(sg_object& vs, agg::rgba8 c);
+    virtual void draw_outline(sg_object& vs, agg::rgba8 c);
+    virtual void draw_outline_alias(sg_object& vs, agg::rgba8 c);
 
     void write_header(double w, double h) {
         fprintf(m_output, svg_header, w, h);
@@ -79,15 +62,10 @@ public:
         fprintf(f, "%s\n", s.cstr());
     }
 
-    static const double default_stroke_width;
-
 private:
     FILE *m_output;
     double m_height;
     int m_current_id;
 };
-
-template <> void canvas_svg::draw<sg_object>(sg_object& vs, agg::rgba8 c);
-template <> void canvas_svg::draw_outline<sg_object>(sg_object& vs, agg::rgba8 c);
 
 #endif

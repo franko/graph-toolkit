@@ -20,7 +20,7 @@ bitmap_save_image(sg_plot *p, const char *fn, unsigned w, unsigned h)
 
     rbuf_tmp.attach(buffer, w, h, flip_y ? row_size : -row_size);
 
-    canvas can(rbuf_tmp, w, h, colors::white);
+    canvas_gray_aa can(rbuf_tmp, w, h, colors::white);
     agg::trans_affine mtx(w, 0.0, 0.0, h, 0.0, 0.0);
 
     agg::rect_base<int> r = rect_of_slot_matrix<int>(mtx);

@@ -57,8 +57,8 @@ private:
     agg::pod_bvector<drawing_area*> m_drawing_areas;
 
 public:
-    window(agg::pix_format_e pixel_format, agg::rgba8 bgcol= colors::white):
-        canvas_window(pixel_format, bgcol)
+    window(agg::pix_format_e pixel_format, render_type_e render_type, agg::rgba8 bgcol= colors::white):
+        canvas_window(pixel_format, render_type, bgcol)
     {
         const agg::trans_affine identity_matrix;
         add_drawing_area(identity_matrix);

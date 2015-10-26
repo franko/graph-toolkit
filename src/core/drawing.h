@@ -12,9 +12,8 @@ struct plot_render_info {
 struct drawing {
     drawing() {};
     virtual ~drawing() {}
-    virtual void draw(virtual_canvas& c, const agg::trans_affine& m, plot_render_info *inf) = 0;
-    virtual void draw(canvas_svg& c, const agg::trans_affine& m, plot_render_info *inf) = 0;
-    virtual void draw_queue(virtual_canvas& c, const agg::trans_affine& m, const plot_render_info& inf, opt_rect<double>& bbox) = 0;
+    virtual void draw(canvas& c, const agg::trans_affine& m, plot_render_info *inf) = 0;
+    virtual void draw_queue(canvas& c, const agg::trans_affine& m, const plot_render_info& inf, opt_rect<double>& bbox) = 0;
     virtual bool need_redraw() = 0;
 };
 
@@ -23,9 +22,8 @@ class drawing_adapter : public drawing {
 public:
     drawing_adapter(T& d): m_drawing(d) {}
     ~drawing_adapter() {}
-    virtual void draw(virtual_canvas& c, const agg::trans_affine& m, plot_render_info *inf) { m_drawing.draw(c, m, inf); }
-    virtual void draw(canvas_svg& c, const agg::trans_affine& m, plot_render_info *inf) { m_drawing.draw(c, m, inf); }
-    virtual void draw_queue(virtual_canvas& c, const agg::trans_affine& m, const plot_render_info& inf, opt_rect<double>& bbox) { m_drawing.draw_queue(c, m, inf, bbox); }
+    virtual void draw(canvas& c, const agg::trans_affine& m, plot_render_info *inf) { m_drawing.draw(c, m, inf); }
+    virtual void draw_queue(canvas& c, const agg::trans_affine& m, const plot_render_info& inf, opt_rect<double>& bbox) { m_drawing.draw_queue(c, m, inf, bbox); }
     virtual bool need_redraw() { return m_drawing.need_redraw(); }
 private:
     T& m_drawing;

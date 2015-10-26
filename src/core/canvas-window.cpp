@@ -34,11 +34,16 @@ __END_DECLS
 void
 canvas_window::on_resize(int sx, int sy)
 {
-    typedef canvas canvas_type;
     if (m_canvas)
         delete m_canvas;
 
-    m_canvas = new canvas_adapter<canvas_type, true>(new(std::nothrow) canvas_type(rbuf_window(), sx, sy, m_bgcolor));
+    if (m_render_type == render_gray_aa) {
+        m_canvas = new canvas_gray_aa(rbuf_window(), sx, sy, m_bgcolor);
+    } else if (m_render_type == render_subpixel_aa) {
+        m_canvas = new canvas_subpixel_aa(rbuf_window(), sx, sy, m_bgcolor);
+    } else {
+        m_canvas = NULL;
+    }
 
     m_matrix.sx = sx;
     m_matrix.sy = sy;

@@ -31,7 +31,6 @@
 #include "units.h"
 #include "resource-manager.h"
 #include "colors.h"
-#include "canvas_svg.h"
 #include "trans.h"
 #include "text.h"
 #include "categories.h"
@@ -150,7 +149,6 @@ protected:
 
 public:
     typedef list<item> iterator;
-    typedef virtual_canvas canvas_type;
 
     enum axis_e { x_axis, y_axis };
     enum placement_e { right = 0, left = 1, bottom = 2, top = 3 };
@@ -300,27 +298,9 @@ public:
             bb = agg::rect_base<double>(0.0, 0.0, 0.0, 0.0);
     }
 
-    template <class Canvas>
-    void draw(Canvas& canvas, const agg::trans_affine& m, plot_render_info* inf)
-    {
-        canvas_adapter<Canvas> vc(&canvas);
-        agg::rect_i clip = rect_of_slot_matrix<int>(m);
-        plot_layout layout = compute_plot_layout(m);
-        draw_virtual_canvas(vc, layout, &clip);
-        if (inf)
-            inf->active_area = layout.plot_active_area;
-    }
-
-    template <class Canvas>
-    void draw(Canvas& canvas, const agg::rect_i& r, plot_render_info* inf)
-    {
-        canvas_adapter<Canvas> vc(&canvas);
-        agg::trans_affine mtx = affine_matrix(r);
-        plot_layout layout = compute_plot_layout(mtx);
-        draw_virtual_canvas(vc, layout, &r);
-        if (inf)
-            inf->active_area = layout.plot_active_area;
-    }
+    void draw(canvas& canvas, const agg::trans_affine& m, plot_render_info* inf);
+    void draw(canvas& canvas, const agg::rect_i& r, plot_render_info* inf);
+    void draw_queue(canvas& canvas, const agg::trans_affine& m, const plot_render_info& inf, opt_rect<double>& bbox);
 
     virtual bool push_layer();
     virtual bool pop_layer();
@@ -342,9 +322,6 @@ public:
         return m_need_redraw;
     };
     void commit_pending_draw();
-
-    template <class Canvas>
-    void draw_queue(Canvas& canvas, const agg::trans_affine& m, const plot_render_info& inf, opt_rect<double>& bbox);
 
     void sync_mode(bool req_mode) {
         m_sync_mode = req_mode;
@@ -400,8 +377,8 @@ public:
     }
 
 protected:
-    void draw_virtual_canvas(canvas_type& canvas, plot_layout& layout, const agg::rect_i* r);
-    void draw_simple(canvas_type& canvas, plot_layout& layout, const agg::rect_i* r);
+    void draw_virtual_canvas(canvas& canvas, plot_layout& layout, const agg::rect_i* r);
+    void draw_simple(canvas& canvas, plot_layout& layout, const agg::rect_i* r);
 
     void draw_grid(const axis_e dir, const units& u,
                    const agg::trans_affine& user_mtx,
@@ -416,11 +393,11 @@ protected:
                              ptr_list<factor_labels>* f_labels, double scale,
                              agg::path_storage& mark, agg::path_storage& ln);
 
-    void draw_elements(canvas_type &canvas, const plot_layout& layout);
-    void draw_element(item& c, canvas_type &canvas, const agg::trans_affine& m);
-    void draw_axis(canvas_type& can, plot_layout& layout, const agg::rect_i* clip = 0);
+    void draw_elements(canvas &canvas, const plot_layout& layout);
+    void draw_element(item& c, canvas &canvas, const agg::trans_affine& m);
+    void draw_axis(canvas& can, plot_layout& layout, const agg::rect_i* clip = 0);
 
-    void draw_legends(canvas_type& canvas, const plot_layout& layout);
+    void draw_legends(canvas& canvas, const plot_layout& layout);
 
     plot_layout compute_plot_layout(const agg::trans_affine& canvas_mtx, bool do_legends = true);
 
@@ -428,7 +405,7 @@ protected:
     // coordinates
     agg::trans_affine get_model_matrix(const plot_layout& layout);
 
-    void clip_plot_area(canvas_type& canvas, const agg::trans_affine& canvas_mtx);
+    void clip_plot_area(canvas& canvas, const agg::trans_affine& canvas_mtx);
 
     void compute_user_trans();
 
@@ -484,41 +461,5 @@ private:
 
     ptr_list<factor_labels>* m_xaxis_hol;
 };
-
-template <class Canvas>
-void plot::draw_queue(Canvas& _canvas, const agg::trans_affine& canvas_mtx, const plot_render_info& inf, opt_rect<double>& bb)
-{
-    canvas_adapter<Canvas> canvas(&_canvas);
-    before_draw();
-
-    plot_layout layout = compute_plot_layout(canvas_mtx);
-    layout.plot_active_area = inf.active_area;
-
-    this->clip_plot_area(canvas, layout.plot_active_area);
-
-    typedef typename plot::iterator iter_type;
-    iter_type *c0 = m_drawing_queue;
-    for (iter_type *c = c0; c != 0; c = c->next())
-    {
-        item& d = c->content();
-        agg::trans_affine m = get_model_matrix(layout);
-        draw_element(d, canvas, m);
-
-        agg::rect_base<double> ebb;
-        bool not_empty = agg::bounding_rect_single(d.content(), 0, &ebb.x1, &ebb.y1, &ebb.x2, &ebb.y2);
-
-        if (not_empty)
-            bb.add<rect_union>(ebb);
-    }
-
-    m_changes_accu.add<rect_union>(bb);
-
-    if (m_changes_pending.is_defined())
-    {
-        bb.add<rect_union>(m_changes_pending);
-    }
-
-    canvas.reset_clipping();
-}
 
 #endif

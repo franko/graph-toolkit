@@ -5,6 +5,58 @@ static double compute_scale(const agg::trans_affine& m)
     return m.scale() / 480.0;
 }
 
+void plot::draw(canvas& canvas, const agg::trans_affine& m, plot_render_info* inf)
+{
+    agg::rect_i clip = rect_of_slot_matrix<int>(m);
+    plot_layout layout = compute_plot_layout(m);
+    draw_virtual_canvas(canvas, layout, &clip);
+    if (inf)
+        inf->active_area = layout.plot_active_area;
+}
+
+void plot::draw(canvas& canvas, const agg::rect_i& r, plot_render_info* inf)
+{
+    agg::trans_affine mtx = affine_matrix(r);
+    plot_layout layout = compute_plot_layout(mtx);
+    draw_virtual_canvas(canvas, layout, &r);
+    if (inf)
+        inf->active_area = layout.plot_active_area;
+}
+
+void plot::draw_queue(canvas& canvas, const agg::trans_affine& canvas_mtx, const plot_render_info& inf, opt_rect<double>& bb)
+{
+    before_draw();
+
+    plot_layout layout = compute_plot_layout(canvas_mtx);
+    layout.plot_active_area = inf.active_area;
+
+    this->clip_plot_area(canvas, layout.plot_active_area);
+
+    typedef typename plot::iterator iter_type;
+    iter_type *c0 = m_drawing_queue;
+    for (iter_type *c = c0; c != 0; c = c->next())
+    {
+        item& d = c->content();
+        agg::trans_affine m = get_model_matrix(layout);
+        draw_element(d, canvas, m);
+
+        agg::rect_base<double> ebb;
+        bool not_empty = agg::bounding_rect_single(d.content(), 0, &ebb.x1, &ebb.y1, &ebb.x2, &ebb.y2);
+
+        if (not_empty)
+            bb.add<rect_union>(ebb);
+    }
+
+    m_changes_accu.add<rect_union>(bb);
+
+    if (m_changes_pending.is_defined())
+    {
+        bb.add<rect_union>(m_changes_pending);
+    }
+
+    canvas.reset_clipping();
+}
+
 void plot::commit_pending_draw()
 {
     push_drawing_queue();
@@ -48,7 +100,7 @@ static bool area_is_valid(const agg::trans_affine& b)
     return (b.sx > thresold && b.sy > thresold);
 }
 
-void plot::draw_virtual_canvas(canvas_type& canvas, plot_layout& layout, const agg::rect_i* clip)
+void plot::draw_virtual_canvas(canvas& canvas, plot_layout& layout, const agg::rect_i* clip)
 {
     before_draw();
     draw_legends(canvas, layout);
@@ -60,14 +112,14 @@ void plot::draw_virtual_canvas(canvas_type& canvas, plot_layout& layout, const a
     }
 };
 
-void plot::draw_simple(canvas_type& canvas, plot_layout& layout, const agg::rect_i* clip)
+void plot::draw_simple(canvas& canvas, plot_layout& layout, const agg::rect_i* clip)
 {
     before_draw();
     draw_axis(canvas, layout, clip);
     draw_elements(canvas, layout);
 };
 
-void plot::draw_element(item& c, canvas_type& canvas, const agg::trans_affine& m)
+void plot::draw_element(item& c, canvas& canvas, const agg::trans_affine& m)
 {
     sg_object& vs = c.content();
     vs.apply_transform(m, 1.0);
@@ -85,7 +137,7 @@ agg::trans_affine plot::get_model_matrix(const plot_layout& layout)
     return m;
 }
 
-void plot::clip_plot_area(canvas_type& canvas, const agg::trans_affine& area_mtx)
+void plot::clip_plot_area(canvas& canvas, const agg::trans_affine& area_mtx)
 {
     if (this->clip_is_active())
     {
@@ -94,7 +146,7 @@ void plot::clip_plot_area(canvas_type& canvas, const agg::trans_affine& area_mtx
     }
 }
 
-void plot::draw_elements(canvas_type& canvas, const plot_layout& layout)
+void plot::draw_elements(canvas& canvas, const plot_layout& layout)
 {
     const agg::trans_affine m = get_model_matrix(layout);
 
@@ -417,7 +469,7 @@ plot_layout plot::compute_plot_layout(const agg::trans_affine& canvas_mtx, bool 
     return layout;
 }
 
-void plot::draw_legends(canvas_type& canvas, const plot_layout& layout)
+void plot::draw_legends(canvas& canvas, const plot_layout& layout)
 {
     if (!str_is_null(&m_title))
     {
@@ -444,7 +496,7 @@ void plot::draw_legends(canvas_type& canvas, const plot_layout& layout)
 
 // Draw the axis elements and labels and set layout.plot_active_area
 // to the actual plotting are matrix.
-void plot::draw_axis(canvas_type& canvas, plot_layout& layout, const agg::rect_i* clip)
+void plot::draw_axis(canvas& canvas, plot_layout& layout, const agg::rect_i* clip)
 {
     if (!m_use_units)
     {

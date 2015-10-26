@@ -26,26 +26,28 @@ int main()
     int status = initialize_fonts();
     if (status != init_fonts_success) return 1;
 
-    window *win = new window(agg::pix_format_rgb24, render_subpixel_aa);
     plot_auto *p = new plot_auto();
     draw::path *line = build_curve(my_fun_s, -1.0, 1.0, 256);
     sg_object *sline = new trans::scaling(line);
     agg::rgba8 red(190,10,10,255);
     p->add(sline, red, true);
-    p->commit_pending_draw();
-    int slot_id = 0;
-    win->attach(new drawing_adapter<plot_auto>(*p), slot_id);
-    win->start_with_id(1);
-
-    sleep(2);
 
     draw::path *line_c = build_curve(my_fun_c, -0.4, 0.4, 128);
     agg::rgba8 blue(10,10,190,255);
     sg_object *sline_c = new trans::scaling(line_c);
     p->add(sline_c, blue, true);
-    win->draw_slot(slot_id, false);
+
     p->commit_pending_draw();
 
-    sleep(10);
+    FILE* f = fopen("test.svg", "w");
+    if (f) {
+        int w = 600, h = 400;
+        canvas_svg canvas(f, h);
+        agg::trans_affine_scaling m(w, h);
+        canvas.write_header(w, h);
+        p->draw(canvas, m, NULL);
+        canvas.write_end();
+        fclose(f);
+    }
     return 0;
 }

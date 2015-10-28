@@ -32,9 +32,11 @@ int main()
     sg_object *sline = new trans::scaling(line);
     agg::rgba8 red(190,10,10,255);
     p->add(sline, red, true);
+    p->title() = "Example plot";
+    p->x_axis_title() = "x axis";
     p->commit_pending_draw();
     int slot_id = 0;
-    win->attach(new drawing_adapter<plot_auto>(*p), slot_id);
+    win->attach(new drawing_adapter<plot_auto, manage_owner>(p), slot_id);
     win->start_with_id(1);
 
     sleep(2);
@@ -47,5 +49,9 @@ int main()
     p->commit_pending_draw();
 
     sleep(10);
+
+    win->shutdown_close(true);
+    delete win;
+
     return 0;
 }

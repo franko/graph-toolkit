@@ -199,7 +199,7 @@ window_attach (lua_State *L)
     int slot_id = (lua_gettop(L) > 2 ? lua_tointeger(L, 3) : 0);
 
     win->lock();
-    drawing_adapter<sg_plot> *pdrawing = new drawing_adapter<sg_plot>(*plot);
+    drawing_adapter<sg_plot, manage_owner> *pdrawing = new drawing_adapter<sg_plot, manage_owner>(plot);
     if (win->attach(pdrawing, slot_id)) {
         if (win->status == canvas_window::running)
             win->draw_slot(slot_id, true);

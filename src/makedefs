@@ -20,6 +20,9 @@ endif
 
 ARCH := $(shell uname -m)
 
+CFLAGS += -fPIC
+CXXFLAGS += -fPIC
+
 ifeq ($(strip $(DEBUG)), yes)
   CFLAGS += -g -Wall
   CXXFLAGS += -g -Wall

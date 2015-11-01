@@ -4,7 +4,7 @@ include ../src/makegraphdefs
 
 TESTS_C_SRC_FILES =
 TESTS_CPP_SRC_FILES = plot1.cpp plot1_svg.cpp
-TESTS_EXE_FILES := $(TESTS_CPP_SRC_FILES:%.cpp=%) $(TESTS_C_SRC_FILES:%.cpp=%)
+TESTS_EXE_FILES := $(TESTS_CPP_SRC_FILES:%.cpp=%.exe) $(TESTS_C_SRC_FILES:%.cpp=%.exe)
 
 PROJECT_INCLUDES = -I../src -I../src/core -I../src/str
 PROJECT_LIBS = ../src/core/libgraph.a ../src/str/libstr.a
@@ -21,7 +21,7 @@ DEPS_MAGIC := $(shell mkdir .deps > /dev/null 2>&1 || :)
 clean:
 	rm -fr *.o $(TESTS_EXE_FILES)
 
-%: %.o
+%.exe: %.o
 	$(E) compiling $@
 	$(Q)$(CXX) -o $@ $< $(PROJECT_LIBS) $(LIBS) -lm
 

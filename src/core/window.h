@@ -72,7 +72,6 @@ public:
     void add_drawing_area(const agg::trans_affine& m);
     bool attach(drawing *plot, int slot_id);
     void draw_slot(int slot_id, bool update_req);
-    void refresh_slot(int slot_id);
     int start_with_id(int window_id);
 
     void save_slot_image(int slot_id);

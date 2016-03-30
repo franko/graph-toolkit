@@ -77,7 +77,7 @@ public:
     void save_slot_image(int slot_id);
     void restore_slot_image(int slot_id);
 
-    void draw_slot(int slot_id);
+    // void draw_slot(int slot_id);
 
     virtual void on_draw();
     virtual void on_resize(int sx, int sy);

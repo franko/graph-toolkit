@@ -46,20 +46,11 @@ struct DrawingArea {
 };
 
 class WindowRenderer {
-private:
-    void drawArea(DrawingArea& drawing_area, bool dirty);
-    void drawAreaQueue(DrawingArea& drawing_area, bool draw_all);
-
-    agg::pod_bvector<DrawingArea*> m_drawing_areas;
-
 public:
     WindowRenderer(render_type_e canvas_type, agg::rgba8 bgcol);
+    ~WindowRenderer();
 
-    ~WindowRenderer() {
-        clear_drawing_areas();
-    }
-
-    void clear_drawing_areas();
+    void clearDrawingAreas();
     void addDrawingArea(const agg::trans_affine& m);
     bool attach(drawing *plot, int slot_id);
     void drawSlot(int slot_id, bool update_req);
@@ -69,39 +60,30 @@ public:
     void saveSlotImage(int slot_id);
     void restoreSlotImage(int slot_id);
 
-    void draw_slot(int slot_id);
+    agg::rect_i getDrawingAreaRect(DrawingArea* drawing_area);
 
-    virtual void on_draw();
+    void onDraw();
     void onResize(int sx, int sy);
-
-    template <typename T>
-    void accept(T& visitor) {
-        const int n = m_drawing_areas.size();
-        for (int k = 0; k < n; k++) {
-            drawing *p = m_drawing_areas[k]->plot;
-            if (p) {
-                visitor.drawing(p, k);
-            }
-        }
-    }
-
-    void save_svg(FILE *f, double w, double h);
-
 private:
     DrawingArea *getDrawingArea(int i);
+
+    void drawArea(DrawingArea* drawing_area, bool dirty);
+    void drawAreaQueue(DrawingArea* drawing_area, bool draw_all);
 
     void scaleToViewportSize(agg::trans_affine& m) {
         trans_affine_compose(m, m_viewport_matrix);
     };
 
     int m_window_id;
+    agg::pod_bvector<DrawingArea*> m_drawing_areas;
     agg::rendering_buffer m_ren_buffer;
     canvas* m_rendering_canvas;
     render_type_e m_render_type;
     agg::rgba8 m_bg_color;
     agg::trans_affine m_viewport_matrix;
+    int m_pixel_bpp;
+    bool m_flip_y;
     SomeType m_target_window; // To be better defined.
-    SomeOtherType m_format_info;
 };
 
 #endif

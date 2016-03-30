@@ -8,12 +8,22 @@ WindowRenderer::WindowRenderer(render_type_e canvas_type, agg::rgba8 bgcol): m_c
    addDrawingArea(identity_matrix);
 }
 
+WindowRenderer::~WindowRenderer() {
+    clearDrawingAreas();
+}
+
 WindowRenderer::DrawingArea* WindowRenderer::getDrawingArea(int i)
 {
     if (i >= 0 && unsigned(i) < m_drawing_areas.size()) {
         return m_drawing_areas[i];
     }
     return NULL;
+}
+
+agg::rect_i WindowRenderer::getDrawingAreaRect(DrawingArea* drawing_area) {
+    agg::trans_affine m(drawing_area->matrix);
+    scaleToViewportSize(m);
+    return rect_of_slot_matrix<int>(m);
 }
 
 void
@@ -43,22 +53,22 @@ void WindowRenderer::onResize(int sx, int sy) {
         m_canvas = nullptr;
     }
 
+    for (unsigned i = 0; i < m_drawing_areas.size(); i++) {
+        m_drawing_areas[i]->disposeBuffer();
+    }
+
     m_matrix.sx = sx;
     m_matrix.sy = sy;
 }
 
-void WindowRenderer::drawArea(WindowRenderer::DrawingArea& drawing_area, bool draw_image)
+void WindowRenderer::drawArea(WindowRenderer::DrawingArea* drawing_area, bool draw_image)
 {
-    agg::trans_affine mtx(drawing_area.matrix);
-    scaleToViewportSize(mtx);
-
-    agg::rect_base<int> r = rect_of_slot_matrix<int>(mtx);
+    auto r = getDrawingAreaRect(drawing_area);
     m_canvas->clear_box(r);
 
-    if (drawing_area.plot)
-    {
+    if (drawing_area->plot) {
         AGG_LOCK();
-        drawing_area.plot->draw(*m_canvas, mtx, &drawing_area.inf);
+        drawing_area->plot->draw(*m_canvas, mtx, &drawing_area->inf);
         AGG_UNLOCK();
     }
 
@@ -71,14 +81,14 @@ void WindowRenderer::drawArea(WindowRenderer::DrawingArea& drawing_area, bool dr
 void
 WindowRenderer::drawSlot(int slot_id, bool clean_req)
 {
-    DrawingArea *drawing_area = getDrawingArea(slot_id);
+    DrawingArea* drawing_area = getDrawingArea(slot_id);
     if (drawing_area && m_canvas) {
         bool redraw = clean_req || drawing_area->plot->need_redraw();
         if (redraw) {
-            drawArea(*drawing_area, false);
+            drawArea(drawing_area, false);
             drawing_area->disposeBuffer();
         }
-        drawAreaQueue(*drawing_area, redraw);
+        drawAreaQueue(drawing_area, redraw);
         drawing_area->valid_rect = true;
     }
 }
@@ -86,73 +96,69 @@ WindowRenderer::drawSlot(int slot_id, bool clean_req)
 void
 WindowRenderer::saveSlotImage(int slot_id)
 {
-    DrawingArea *drawing_area = getDrawingArea(slot_id);
+    DrawingArea* drawing_area = getDrawingArea(slot_id);
     if (drawing_area != 0) {
-        agg::trans_affine mtx(drawing_area->matrix);
-        scaleToViewportSize(mtx);
-        agg::rect_base<int> r = rect_of_slot_matrix<int>(mtx);
-        drawing_area->saveImage(m_ren_buffer, r, m_format_info->bpp(), m_format_info->flip_y());
+        auto r = getDrawingAreaRect(drawing_area);
+        drawing_area->saveImage(m_ren_buffer, r, m_pixel_bpp, m_flip_y;
     }
 }
 
 void
 WindowRenderer::restoreSlotImage(int slot_id)
 {
-    DrawingArea *drawing_area = getDrawingArea(slot_id);
-    if (drawing_area != 0) {
-        agg::trans_affine mtx(drawing_area->matrix);
-        scaleToViewportSize(mtx);
-        agg::rect_base<int> r = rect_of_slot_matrix<int>(mtx);
-        if (drawing_area->layer_buf == 0) {
+    DrawingArea* drawing_area = getDrawingArea(slot_id);
+    if (drawing_area != nullptr) {
+        auto r = getDrawingAreaRect(drawing_area);
+        if (drawing_area->layer_buf == nullptr) {
             m_canvas->clear_box(r);
-            drawArea(*drawing_area, false);
-            drawing_area->saveImage(this->rbuf_window(), r, this->bpp(), this->flip_y());
+            drawArea(drawing_area, false);
+            drawing_area->saveImage(m_ren_buffer, r, m_pixel_bpp, m_flip_y);
         } else {
             agg::rendering_buffer& img = drawing_area->layer_img;
-            agg::rendering_buffer& win = this->rbuf_window();
-            rendering_buffer_put_region (win, img, r, this->bpp() / 8);
+            agg::rendering_buffer& win = m_ren_buffer;
+            rendering_buffer_put_region(win, img, r, m_pixel_bpp / 8);
         }
     }
 }
 
 void
-WindowRenderer::drawAreaQueue(DrawingArea& drawing_area, bool draw_all)
+WindowRenderer::drawAreaQueue(DrawingArea* drawing_area, bool draw_all)
 {
-    agg::trans_affine mtx(drawing_area.matrix);
-    this->scale(mtx);
+    agg::trans_affine mtx(drawing_area->matrix);
+    scaleToViewportSize(mtx);
 
     opt_rect<double> rect;
 
-    if (!drawing_area.valid_rect || draw_all)
+    if (!drawing_area->valid_rect || draw_all)
         rect.set(rect_of_slot_matrix<double>(mtx));
 
     AGG_LOCK();
     opt_rect<double> draw_rect;
-    drawing_area.plot->draw_queue(*m_canvas, mtx, drawing_area.inf, draw_rect);
+    drawing_area->plot->draw_queue(*m_canvas, mtx, drawing_area->inf, draw_rect);
     rect.add<rect_union>(draw_rect);
-    rect.add<rect_union>(drawing_area.dirty_rect);
-    drawing_area.dirty_rect = draw_rect;
+    rect.add<rect_union>(drawing_area->dirty_rect);
+    drawing_area->dirty_rect = draw_rect;
     AGG_UNLOCK();
 
-    if (rect.is_defined())
-    {
-        const int m = 4;
-        const agg::rect_base<double>& r = rect.rect();
-        const agg::rect_base<int> ri(r.x1 - m, r.y1 - m, r.x2 + m, r.y2 + m);
-        update_region (ri);
+    if (rect.is_defined()) {
+        const int pad = 4;
+        const agg::rect_d& r = rect.rect();
+        const agg::rect_i ri(r.x1 - pad, r.y1 - pad, r.x2 + pad, r.y2 + pad);
+        m_target_window->updateRegion(ri);
+        // update_region (ri);
     }
 }
 
 void
-WindowRenderer::on_draw()
-{
+WindowRenderer::onDraw() {
     if (m_canvas) {
         for (unsigned i = 0; i < m_drawing_areas.size(); i++) {
-            drawArea(*m_drawing_areas[i], false);
+            drawArea(m_drawing_areas[i], false);
         }
     }
 }
 
+#if 0
 void
 WindowRenderer::on_resize(int sx, int sy)
 {
@@ -161,6 +167,7 @@ WindowRenderer::on_resize(int sx, int sy)
         m_drawing_areas[i]->disposeBuffer();
     }
 }
+#endif
 
 bool WindowRenderer::attach(drawing* plot, int slot_id)
 {
@@ -171,19 +178,20 @@ bool WindowRenderer::attach(drawing* plot, int slot_id)
     return (r != NULL);
 }
 
-void WindowRenderer::clear_drawing_areas() {
+void WindowRenderer::clearDrawingAreas() {
     for (unsigned k = 0; k < m_drawing_areas.size(); k++) {
         delete m_drawing_areas[k];
     }
 }
 
-void WindowRenderer::add_drawing_area(const agg::trans_affine& m)
+void WindowRenderer::addDrawingArea(const agg::trans_affine& m)
 {
-    DrawingArea *r = new drawing_area();
+    DrawingArea* r = new drawing_area();
     r->matrix = m;
     m_drawing_areas.add(r);
 }
 
+#if 0
 int WindowRenderer::start_with_id(int window_id)
 {
     this->lock();
@@ -240,3 +248,4 @@ void WindowRenderer::save_svg(FILE *f, double w, double h)
     }
     svg_writer.write_end();
 }
+#endif

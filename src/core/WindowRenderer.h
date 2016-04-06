@@ -2,11 +2,14 @@
 #define AGGPLOT_WINDOW_RENDERER_H
 
 // #include "canvas-window-cpp.h"
+#include "WindowUpdate.h"
 #include "drawing.h"
 // #include "graph_locks.h"
 #include "colors.h"
 
 #include "agg_color_rgba.h"
+#include "agg_array.h"
+#include "agg_rendering_buffer.h"
 #include "agg_trans_affine.h"
 
 enum {
@@ -67,8 +70,8 @@ public:
 private:
     DrawingArea *getDrawingArea(int i);
 
-    void drawArea(DrawingArea* drawing_area, bool dirty);
-    void drawAreaQueue(DrawingArea* drawing_area, bool draw_all);
+    void drawArea(DrawingArea *drawing_area, bool dirty);
+    void drawAreaQueue(DrawingArea *drawing_area, bool draw_all);
 
     void scaleToViewportSize(agg::trans_affine& m) {
         trans_affine_compose(m, m_viewport_matrix);
@@ -77,13 +80,13 @@ private:
     int m_window_id;
     agg::pod_bvector<DrawingArea*> m_drawing_areas;
     agg::rendering_buffer m_ren_buffer;
-    canvas* m_rendering_canvas;
+    canvas* m_canvas;
     render_type_e m_render_type;
     agg::rgba8 m_bg_color;
     agg::trans_affine m_viewport_matrix;
     int m_pixel_bpp;
     bool m_flip_y;
-    SomeType m_target_window; // To be better defined.
+    WindowUpdate *m_target_window;
 };
 
 #endif

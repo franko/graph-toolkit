@@ -1,33 +1,29 @@
+#include <new>
+
 #include "WindowRenderer.h"
 #include "rendering_buffer_utils.h"
 #include "graph_locks.h"
 // #include "platform_support_ext.h"
 
-WindowRenderer::WindowRenderer(render_type_e canvas_type, agg::rgba8 bgcol): m_canvas(nullptr), m_render_type(canvas_type), m_bg_color(bgcol) {
-   const agg::trans_affine identity_matrix;
-   addDrawingArea(identity_matrix);
+WindowRenderer::WindowRenderer(render_type_e canvas_type, agg::rgba8 bgcol)
+    : m_canvas(nullptr), m_render_type(canvas_type), m_bg_color(bgcol)
+{
+    const agg::trans_affine identity_matrix;
+    addDrawingArea(identity_matrix);
 }
 
 WindowRenderer::~WindowRenderer() {
     clearDrawingAreas();
 }
 
-WindowRenderer::DrawingArea* WindowRenderer::getDrawingArea(int i)
-{
+DrawingArea* WindowRenderer::getDrawingArea(int i) {
     if (i >= 0 && unsigned(i) < m_drawing_areas.size()) {
         return m_drawing_areas[i];
     }
     return NULL;
 }
 
-agg::rect_i WindowRenderer::getDrawingAreaRect(DrawingArea* drawing_area) {
-    agg::trans_affine m(drawing_area->matrix);
-    scaleToViewportSize(m);
-    return rect_of_slot_matrix<int>(m);
-}
-
-void
-WindowRenderer::DrawingArea::saveImage(agg::rendering_buffer& win_buf, agg::rect_base<int>& r, int img_bpp, bool flip_y) {
+void DrawingArea::saveImage(agg::rendering_buffer& win_buf, agg::rect_base<int>& r, int img_bpp, bool flip_y) {
     int w = r.x2 - r.x1, h = r.y2 - r.y1;
     int row_len = w * (img_bpp / 8);
 
@@ -42,13 +38,19 @@ WindowRenderer::DrawingArea::saveImage(agg::rendering_buffer& win_buf, agg::rect
     }
 }
 
+agg::rect_i WindowRenderer::getDrawingAreaRect(DrawingArea* drawing_area) {
+    agg::trans_affine m(drawing_area->matrix);
+    scaleToViewportSize(m);
+    return rect_of_slot_matrix<int>(m);
+}
+
 void WindowRenderer::onResize(int sx, int sy) {
     delete m_canvas;
 
     if (m_render_type == render_gray_aa) {
-        m_canvas = new canvas_gray_aa(rbuf_window(), sx, sy, m_bgcolor);
+        m_canvas = new canvas_gray_aa(m_ren_buffer, sx, sy, m_bg_color);
     } else if (m_render_type == render_subpixel_aa) {
-        m_canvas = new canvas_subpixel_aa(rbuf_window(), sx, sy, m_bgcolor);
+        m_canvas = new canvas_subpixel_aa(m_ren_buffer, sx, sy, m_bg_color);
     } else {
         m_canvas = nullptr;
     }
@@ -57,18 +59,20 @@ void WindowRenderer::onResize(int sx, int sy) {
         m_drawing_areas[i]->disposeBuffer();
     }
 
-    m_matrix.sx = sx;
-    m_matrix.sy = sy;
+    m_viewport_matrix.sx = sx;
+    m_viewport_matrix.sy = sy;
 }
 
-void WindowRenderer::drawArea(WindowRenderer::DrawingArea* drawing_area, bool draw_image)
-{
-    auto r = getDrawingAreaRect(drawing_area);
+void WindowRenderer::drawArea(DrawingArea *drawing_area, bool draw_image) {
+    agg::trans_affine drawing_area_matrix(drawing_area->matrix);
+    scaleToViewportSize(drawing_area_matrix);
+
+    auto r = rect_of_slot_matrix<int>(drawing_area_matrix);
     m_canvas->clear_box(r);
 
     if (drawing_area->plot) {
         AGG_LOCK();
-        drawing_area->plot->draw(*m_canvas, mtx, &drawing_area->inf);
+        drawing_area->plot->draw(*m_canvas, drawing_area_matrix, &drawing_area->inf);
         AGG_UNLOCK();
     }
 
@@ -93,19 +97,15 @@ WindowRenderer::drawSlot(int slot_id, bool clean_req)
     }
 }
 
-void
-WindowRenderer::saveSlotImage(int slot_id)
-{
+void WindowRenderer::saveSlotImage(int slot_id) {
     DrawingArea* drawing_area = getDrawingArea(slot_id);
     if (drawing_area != 0) {
         auto r = getDrawingAreaRect(drawing_area);
-        drawing_area->saveImage(m_ren_buffer, r, m_pixel_bpp, m_flip_y;
+        drawing_area->saveImage(m_ren_buffer, r, m_pixel_bpp, m_flip_y);
     }
 }
 
-void
-WindowRenderer::restoreSlotImage(int slot_id)
-{
+void WindowRenderer::restoreSlotImage(int slot_id) {
     DrawingArea* drawing_area = getDrawingArea(slot_id);
     if (drawing_area != nullptr) {
         auto r = getDrawingAreaRect(drawing_area);
@@ -122,8 +122,7 @@ WindowRenderer::restoreSlotImage(int slot_id)
 }
 
 void
-WindowRenderer::drawAreaQueue(DrawingArea* drawing_area, bool draw_all)
-{
+WindowRenderer::drawAreaQueue(DrawingArea *drawing_area, bool draw_all) {
     agg::trans_affine mtx(drawing_area->matrix);
     scaleToViewportSize(mtx);
 
@@ -184,11 +183,10 @@ void WindowRenderer::clearDrawingAreas() {
     }
 }
 
-void WindowRenderer::addDrawingArea(const agg::trans_affine& m)
-{
-    DrawingArea* r = new drawing_area();
-    r->matrix = m;
-    m_drawing_areas.add(r);
+void WindowRenderer::addDrawingArea(const agg::trans_affine& m) {
+    auto drawing_area = new DrawingArea();
+    drawing_area->matrix = m;
+    m_drawing_areas.add(drawing_area);
 }
 
 #if 0

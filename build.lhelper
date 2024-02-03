@@ -1,0 +1,7 @@
+CC="${CC:-gcc}"
+CXX="${CXX:-g++}"
+
+BUILD_TYPE="Release"
+
+packages=(libagg freetype2 "lua 5.1.5-2")
+

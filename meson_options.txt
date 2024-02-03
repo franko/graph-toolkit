@@ -1,0 +1,3 @@
+option('gamma-correction', type : 'boolean', value : true, description: 'Enable gamma correction')
+option('subpixel-lcd', type : 'boolean', value : true, description: 'Enable subpixel LCD rendering')
+

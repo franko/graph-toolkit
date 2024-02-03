@@ -2,7 +2,9 @@ project('graph-toolkit', ['c', 'cpp'], version : '1.0', default_options : ['c_st
 
 cc = meson.get_compiler('c')
 
-lua_dep = dependency('lua5.1')
+graph_toolkit_lua = get_option('lua')
+
+lua_dep = dependency(graph_toolkit_lua)
 freetype_dep = dependency('freetype2')
 thread_dep = dependency('threads')
 

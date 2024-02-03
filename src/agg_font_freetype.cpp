@@ -111,11 +111,9 @@ static const unsigned crc32tab[256] =
 static unsigned calc_crc32(const unsigned char* buf, unsigned size)
 {
     unsigned crc = (unsigned)~0;
-    const unsigned char* p;
-    unsigned len = 0;
     unsigned nr = size;
 
-    for (len += nr, p = buf; nr--; ++p)
+    for (const unsigned char *p = buf; nr--; ++p)
     {
         crc = (crc >> 8) ^ crc32tab[(crc ^ *p) & 0xff];
     }
@@ -860,7 +858,7 @@ void font_engine_freetype_base::update_signature()
             gamma_hash = calc_crc32(gamma_table, sizeof(gamma_table));
         }
 
-        sprintf(m_signature,
+        snprintf(m_signature, m_name_len + 256 + 1,
                 "%s,%u,%d,%d,%d:%dx%d,%d,%d,%08X",
                 m_name,
                 m_char_map,
@@ -879,7 +877,7 @@ void font_engine_freetype_base::update_signature()
             double mtx[6];
             char buf[100];
             m_affine.store_to(mtx);
-            sprintf(buf, ",%08X%08X%08X%08X%08X%08X",
+            snprintf(buf, 100, ",%08X%08X%08X%08X%08X%08X",
                     dbl_to_plain_fx(mtx[0]),
                     dbl_to_plain_fx(mtx[1]),
                     dbl_to_plain_fx(mtx[2]),

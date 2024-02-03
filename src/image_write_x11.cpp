@@ -12,7 +12,7 @@ save_image_file(agg::rendering_buffer& rbuf, const char *fn, agg::pix_format_e s
 {
     unsigned slen = strlen(fn);
     agg::pod_array<char> fnext(slen+5);
-    sprintf(fnext.data(), "%s.ppm", fn);
+    snprintf(fnext.data(), slen+5, "%s.ppm", fn);
 
     FILE* fd = fopen(fnext.data(), "wb");
     if(fd == 0) return false;

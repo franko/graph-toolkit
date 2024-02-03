@@ -107,6 +107,6 @@ void svg_curve_coords_from_vs(VertexSource* vs, str& s, double h)
 extern str svg_stroke_path(str& path_coords, double width, int id, agg::rgba8 c, svg_property_list* properties = 0);
 extern str svg_fill_path(str& path_coords, int id, agg::rgba8 c, svg_property_list* properties = 0);
 extern str svg_marker_path(str& path_coords, double sw, int id, svg_property_list* properties);
-extern void format_rgb(char rgbstr[], agg::rgba8 c);
+extern void format_rgb(char rgbstr[], int rgbstr_size, agg::rgba8 c);
 
 #endif

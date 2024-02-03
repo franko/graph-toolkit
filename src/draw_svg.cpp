@@ -4,9 +4,14 @@
 
 const char *svg_path_property_name[] = {"stroke-dasharray", "marker-start", "marker-mid", "marker-end"};
 
-void format_rgb(char rgbstr[], agg::rgba8 c)
+void format_rgb(char rgbstr[], int rgbstr_size, agg::rgba8 c)
 {
-    sprintf(rgbstr, "#%02X%02X%02X", (int)c.r, (int)c.g, (int)c.b);
+    int w_size = snprintf(rgbstr, rgbstr_size, "#%02X%02X%02X", (int)c.r, (int)c.g, (int)c.b);
+    if (w_size > rgbstr_size - 1) {
+        // Old snprintf may omit the terminating null character if
+        // the buffer is too small.
+        rgbstr[rgbstr_size - 1] = 0;
+    }
 }
 
 static void append_properties(str& s, svg_property_list* properties)
@@ -40,7 +45,7 @@ str svg_stroke_path(str& path_coords, double width, int id, agg::rgba8 c,
                     svg_property_list* properties)
 {
     char rgbstr[8];
-    format_rgb(rgbstr, c);
+    format_rgb(rgbstr, 8, c);
 
     str s = str::print("fill:none;stroke:%s;"
                        "stroke-width:%g;stroke-linecap:butt;"
@@ -64,7 +69,7 @@ str svg_fill_path(str& path_coords, int id, agg::rgba8 c,
                   svg_property_list* properties)
 {
     char rgbstr[8];
-    format_rgb(rgbstr, c);
+    format_rgb(rgbstr, 8, c);
     str s = str::print("fill:%s;stroke:none", rgbstr);
     property_append_alpha(s, "fill-opacity", c);
     append_properties(s, properties);

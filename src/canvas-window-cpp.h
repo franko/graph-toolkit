@@ -57,7 +57,7 @@ public:
 
     void shutdown_close(bool send_close_request);
 
-    bool start_new_thread (std::auto_ptr<thread_info>& inf);
+    bool start_new_thread (std::unique_ptr<thread_info>& inf);
 
     void scale (agg::trans_affine& m) {
         trans_affine_compose (m, m_matrix);

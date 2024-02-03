@@ -384,7 +384,7 @@ void window::start (lua_State *L, gslshell::ret_status& st)
     if (status != canvas_window::running)
     {
         typedef canvas_window::thread_info thread_info;
-        std::auto_ptr<thread_info> inf(new thread_info(L, this));
+        std::unique_ptr<thread_info> inf = std::make_unique<thread_info>(L, this);
 
         this->window_id = window_index_add (L, -1);
         inf->window_id = this->window_id;
@@ -607,7 +607,7 @@ public:
             agg::trans_affine mtx = ref->matrix;
             agg::trans_affine_scaling scale(m_width, m_height);
             trans_affine_compose(mtx, scale);
-            sprintf(plot_name, "plot%u", ref->slot_id + 1);
+            snprintf(plot_name, 64, "plot%u", ref->slot_id + 1);
             m_canvas.write_group_header(plot_name);
             p->draw(m_canvas, mtx, NULL);
             m_canvas.write_group_end(plot_name);

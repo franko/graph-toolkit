@@ -52,7 +52,7 @@ public:
 
         tree_type *t = new tree_type(dir);
 
-        for (int c = 0; ; c++)
+        while (true)
         {
             node_type* child = parse(lex);
             if (! child)

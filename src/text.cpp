@@ -45,7 +45,7 @@ text::write_svg(int id, agg::rgba8 c, double h)
 
     if (c.r != 0 || c.g != 0 || c.b != 0) {
         char rgbstr[8];
-        format_rgb(rgbstr, c);
+        format_rgb(rgbstr, 8, c);
         style.printf_add(";fill:%s", rgbstr);
     }
 

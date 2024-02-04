@@ -1,4 +1,5 @@
 graph_toolkit_src_files = [
+  'lua-compat.c',
   'str.c',
   'gs-types.c',
   'lua-utils.c',
@@ -35,6 +36,10 @@ if not get_option('subpixel-lcd')
   graph_toolkit_c_args += '-DDISABLE_SUBPIXEL_AA'
 endif
 
+if graph_toolkit_lua == 'lua5.4'
+  graph_toolkit_c_args += '-DGRAPH_TK_USE_LUA54'
+endif
+
 if host_machine.system() == 'windows'
   graph_toolkit_src_files += [ 'fonts_search_win32.cpp', 'image_write_win32.cpp' ]
   graph_toolkit_src_files += [ 'agg_platform_support_win32.cpp', 'agg_win32_bmp.cpp', 'agg_win32_bmp.cpp' ]
@@ -53,6 +58,7 @@ libgraph = shared_library('graphcore',
   graph_toolkit_src_files,
   dependencies: graph_toolkit_deps,
   c_args : graph_toolkit_c_args,
+  cpp_args : graph_toolkit_c_args,
   name_prefix : graph_toolkit_lib_prefix,
   install : true,
 )

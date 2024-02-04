@@ -1,0 +1,7 @@
+CC="${CC:-gcc}"
+CXX="${CXX:-g++}"
+
+BUILD_TYPE="Release"
+
+packages=(freetype2 "lua 5.4.4")
+

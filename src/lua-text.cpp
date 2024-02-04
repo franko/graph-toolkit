@@ -4,6 +4,7 @@ extern "C" {
 #include <lauxlib.h>
 }
 
+#include "lua-compat.h"
 #include "lua-text.h"
 #include "gs-types.h"
 #include "lua-properties.h"
@@ -171,8 +172,8 @@ text_register (lua_State *L)
 {
     luaL_newmetatable (L, GS_METATABLE(GS_DRAW_TEXT));
     register_properties_index(L, text_methods, text_properties_get, text_properties_set);
-    luaL_register (L, NULL, text_metatable);
+    grtk_lua_register (L, text_metatable);
     lua_pop (L, 1);
 
-    luaL_register (L, NULL, text_functions);
+    grtk_lua_register (L, text_functions);
 }

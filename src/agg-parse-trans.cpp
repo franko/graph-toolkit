@@ -9,6 +9,7 @@ extern "C" {
 #include <memory>
 
 #include "agg-parse-trans.h"
+#include "lua-compat.h"
 #include "lua-plot.h"
 #include "lua-defs.h"
 #include "lua-cpp-utils.h"
@@ -296,7 +297,7 @@ sg_object* parse_spec_pipeline (lua_State* L, int index, sg_object* src,
         return 0;
     }
 
-    size_t k, nb = lua_objlen (L, index);
+    size_t k, nb = grtk_lua_rawlen (L, index);
 
     sg_object* obj = src;
     for (k = nb; k > 0 && src; k--, src = obj)

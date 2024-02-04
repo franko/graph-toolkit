@@ -47,16 +47,21 @@ inline void* operator new(size_t nbytes, lua_State *L, enum gs_type_e tp)
     return p;
 }
 
-template <class T>
-T* push_new_object (lua_State *L, enum gs_type_e tp)
+inline void* operator new(size_t nbytes, lua_State *L, enum gs_type_e tp, int nuvalue)
 {
-    return new(L, tp) T();
+    void* p = lua_newuserdatauv(L, nbytes, nuvalue);
+    gs_set_metatable (L, tp);
+    return p;
 }
 
-template <class T, class init_type>
-T* push_new_object (lua_State *L, enum gs_type_e tp, init_type& init)
-{
-    return new(L, tp) T(init);
+template <class T, class... Args>
+T* push_new_object(lua_State *L, enum gs_type_e tp, Args&&... args) {
+    return new(L, tp) T(std::forward<Args>(args)...);
+}
+
+template <class T, class... Args>
+T* push_new_object_uv(lua_State *L, enum gs_type_e tp, int nuvalue, Args&&... args) {
+    return new(L, tp, nuvalue) T(std::forward<Args>(args)...);
 }
 
 template <class T>

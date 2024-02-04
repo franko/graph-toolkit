@@ -32,7 +32,11 @@ window_index_add(lua_State *L, int index)
 
     lua_getfield (L, LUA_REGISTRYINDEX, registry_tname);
 
+#ifdef GRAPH_TK_USE_LUA54
+    int n = lua_rawlen (L, -1);
+#else
     int n = lua_objlen (L, -1);
+#endif
 
     lua_pushvalue (L, index);
     lua_rawseti (L, -2, n+1);

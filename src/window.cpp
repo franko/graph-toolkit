@@ -4,6 +4,7 @@ extern "C" {
 #include "lauxlib.h"
 }
 
+#include "lua-compat.h"
 #include "lua-defs.h"
 #include "window-cpp.h"
 #include "window_registry.h"
@@ -677,8 +678,8 @@ natwin_register(lua_State *L)
     luaL_newmetatable (L, GS_METATABLE(GS_WINDOW));
     lua_pushvalue (L, -1);
     lua_setfield (L, -2, "__index");
-    luaL_register (L, NULL, window_methods);
+    grtk_lua_register (L, window_methods);
     lua_pop (L, 1);
 
-    luaL_register (L, NULL, window_functions);
+    grtk_lua_register (L, window_functions);
 }

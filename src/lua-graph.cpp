@@ -55,7 +55,11 @@ luaopen_graphcore(lua_State *L)
 {
     pthread_mutex_init(agg_mutex, NULL);
     window_registry_prepare(L);
+#ifdef GRAPH_TK_USE_LUA54
+    luaL_newlib(L, dummy_entries);
+#else
     luaL_register(L, "graphcore", dummy_entries);
+#endif
     draw_register(L);
     text_register(L);
     plot_register(L);

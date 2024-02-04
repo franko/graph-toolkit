@@ -1,4 +1,4 @@
 option('gamma-correction', type : 'boolean', value : true, description: 'Enable gamma correction')
 option('subpixel-lcd', type : 'boolean', value : true, description: 'Enable subpixel LCD rendering')
-option('lua', type : 'combo', choices : [ 'lua5.1', 'luajit' ], value : 'lua5.1', description: 'Which Lua implementation to use')
+option('lua', type : 'combo', choices : [ 'lua5.1', 'lua5.4', 'luajit' ], value : 'lua5.1', description: 'Which Lua implementation to use')
 

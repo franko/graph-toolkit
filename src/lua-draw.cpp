@@ -26,6 +26,7 @@ extern "C" {
 #include "lauxlib.h"
 }
 
+#include "lua-compat.h"
 #include "lua-draw.h"
 #include "lua-graph.h"
 #include "text-shape.h"
@@ -313,21 +314,21 @@ draw_register (lua_State *L)
 {
     luaL_newmetatable (L, GS_METATABLE(GS_DRAW_PATH));
     agg_path_create_index(L);
-    luaL_register (L, NULL, agg_path_methods);
+    grtk_lua_register(L, agg_path_methods);
     lua_pop (L, 1);
 
     luaL_newmetatable (L, GS_METATABLE(GS_DRAW_ELLIPSE));
-    luaL_register (L, NULL, agg_ellipse_methods);
+    grtk_lua_register (L, agg_ellipse_methods);
     lua_pop (L, 1);
 
     luaL_newmetatable (L, GS_METATABLE(GS_DRAW_TEXTSHAPE));
-    luaL_register (L, NULL, textshape_methods);
+    grtk_lua_register (L, textshape_methods);
     lua_pop (L, 1);
 
     luaL_newmetatable (L, GS_METATABLE(GS_DRAW_MARKER));
-    luaL_register (L, NULL, marker_methods);
+    grtk_lua_register (L, marker_methods);
     lua_pop (L, 1);
 
     /* gsl module registration */
-    luaL_register (L, NULL, draw_functions);
+    grtk_lua_register (L, draw_functions);
 }

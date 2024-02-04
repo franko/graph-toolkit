@@ -23,6 +23,7 @@ extern "C" {
 #include "lauxlib.h"
 }
 
+#include "lua-compat.h"
 #include "lua-plot.h"
 #include "lua-plot-cpp.h"
 #include "window_hooks.h"
@@ -156,13 +157,13 @@ configure_plot_env(lua_State* L, int index)
     lua_newtable(L);
     lua_rawset(L, -3); /* set the field __legend to a new table in the env */
 
-    lua_setfenv (L, index);
+    grtk_lua_setfenv (L, index);
 }
 
 int
 plot_new (lua_State *L)
 {
-    sg_plot *p = push_new_object<sg_plot_auto>(L, GS_PLOT);
+    sg_plot *p = push_new_object_uv<sg_plot_auto>(L, GS_PLOT, 1);
 
     configure_plot_env(L, -1);
 
@@ -238,7 +239,7 @@ objref_mref_add (lua_State *L, int table_index, int index, int value_index)
     }
     else
     {
-        n = lua_objlen (L, -1);
+        n = grtk_lua_rawlen (L, -1);
     }
 
     lua_pushvalue (L, value_index);
@@ -250,7 +251,7 @@ objref_mref_add (lua_State *L, int table_index, int index, int value_index)
 void
 plot_lua_add_ref (lua_State* L, int plot_index, int ref_index)
 {
-    lua_getfenv (L, plot_index);
+    grtk_lua_getfenv (L, plot_index);
     objref_mref_add (L, -1, ref_index, -2);
     lua_pop (L, 1);
 }
@@ -266,7 +267,7 @@ plot_add_gener (lua_State *L, bool as_line)
     if (st.error_msg())
         return luaL_error (L, "%s in %s", st.error_msg(), st.context());
 
-    lua_getfenv (L, 1);
+    grtk_lua_getfenv (L, 1);
     objref_mref_add (L, -1, p->current_layer_index(), 2);
 
     return 0;
@@ -485,7 +486,7 @@ int plot_xaxis_hol_set (lua_State *L)
         hol = new ptr_list<factor_labels>();
 
     factor_labels* fl = new factor_labels(delta);
-    int n = lua_objlen(L, 3);
+    int n = grtk_lua_rawlen(L, 3);
     for (int k = 1; k <= n; k += 2)
     {
         lua_rawgeti(L, 3, k);
@@ -606,7 +607,7 @@ plot_push_layer (lua_State *L)
 static void
 plot_ref_clear (lua_State *L, int index, int layer_id)
 {
-    lua_getfenv (L, index);
+    grtk_lua_getfenv (L, index);
     lua_newtable (L);
     lua_rawseti (L, -2, layer_id);
     lua_pop (L, 1);
@@ -746,7 +747,7 @@ plot_set_categories (lua_State *L)
 
         p->enable_categories(dir);
 
-        n = lua_objlen(L, 3);
+        n = grtk_lua_rawlen(L, 3);
         for (k = 1; k+1 <= n; k += 2)
         {
             lua_rawgeti(L, 3, k);
@@ -794,7 +795,7 @@ static void set_legend_ref(lua_State* L, sg_plot::placement_e pos,
                            int plot_index, int legend_index)
 {
     INDEX_SET_ABS_2(L, plot_index, legend_index);
-    lua_getfenv(L, plot_index); /* env = getfenv(plot) */
+    grtk_lua_getfenv(L, plot_index); /* env = getfenv(plot) */
     lua_pushstring(L, "__legend");
     lua_rawget(L, -2); /* leg_table = env.__legend */
     lua_pushvalue(L, legend_index);
@@ -828,7 +829,7 @@ plot_get_legend(lua_State *L)
     const char* placement = luaL_optstring(L, 2, "r");
     sg_plot::placement_e pos = char_to_placement_enum(L, placement);
 
-    lua_getfenv(L, 1); /* env = getfenv(plot) */
+    grtk_lua_getfenv(L, 1); /* env = getfenv(plot) */
     lua_pushstring(L, "__legend");
     lua_rawget(L, -2); /* leg_table = env.__legend */
     lua_rawgeti(L, -1, pos);  /* push leg_table[pos] */
@@ -842,9 +843,9 @@ plot_register (lua_State *L)
     /* plot declaration */
     luaL_newmetatable (L, GS_METATABLE(GS_PLOT));
     register_properties_index(L, plot_methods, plot_properties_get, plot_properties_set);
-    luaL_register (L, NULL, plot_metatable);
+    grtk_lua_register (L, plot_metatable);
     lua_pop (L, 1);
 
     /* gsl module registration */
-    luaL_register (L, NULL, plot_functions);
+    grtk_lua_register (L, plot_functions);
 }

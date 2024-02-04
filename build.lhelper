@@ -3,5 +3,5 @@ CXX="${CXX:-g++}"
 
 BUILD_TYPE="Release"
 
-packages=(libagg freetype2 "lua 5.1.5-2")
+packages=("freetype2 -pic" "lua -commands -pic 5.1.5-2")
 

@@ -43,7 +43,6 @@ endif
 if host_machine.system() == 'windows'
   graph_toolkit_src_files += [ 'fonts_search_win32.cpp', 'image_write_win32.cpp' ]
   graph_toolkit_src_files += [ 'agg_platform_support_win32.cpp', 'agg_win32_bmp.cpp', 'agg_win32_bmp.cpp' ]
-  graph_toolkit_lib_prefix = ''
 else
   # Besides windows we support only X11 even on macOS
   if host_machine.system() == 'darwin'
@@ -51,7 +50,11 @@ else
   endif
   graph_toolkit_src_files += [ 'fonts_search_x11.cpp', 'image_write_x11.cpp' ]
   graph_toolkit_src_files += [ 'agg_platform_support_x11.cpp' ]
-  graph_toolkit_lib_prefix = 'lib'
+endif
+
+graph_toolkit_link_args = [ ]
+if cc.get_id() == 'gcc' and get_option('buildtype') == 'release'
+    graph_toolkit_link_args += ['-static-libgcc', '-static-libstdc++']
 endif
 
 libgraph = shared_library('graphcore',
@@ -59,7 +62,9 @@ libgraph = shared_library('graphcore',
   dependencies: graph_toolkit_deps,
   c_args : graph_toolkit_c_args,
   cpp_args : graph_toolkit_c_args,
-  name_prefix : graph_toolkit_lib_prefix,
+  link_args : graph_toolkit_link_args,
+  name_prefix : '',
+  install_dir : 'lib/lua/5.4',
   install : true,
 )
 

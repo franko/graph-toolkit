@@ -3,5 +3,5 @@ CXX="${CXX:-g++}"
 
 BUILD_TYPE="Release"
 
-packages=(freetype2 "lua 5.4.4")
+packages=("freetype2 -pic" "lua -app -pic 5.4.4")
 

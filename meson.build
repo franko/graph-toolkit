@@ -23,3 +23,6 @@ endif
 graph_toolkit_c_args = [ ]
 
 subdir('src')
+
+install_data('init.lua', install_dir : 'share/lua/5.4/graph')
+install_data('contour.lua', install_dir : 'share/lua/5.4/graph')

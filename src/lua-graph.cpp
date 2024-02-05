@@ -23,7 +23,9 @@ extern "C" {
 #include <lauxlib.h>
 }
 
+#define GRAPH_TK_COMPILATION
 #include "lua-graph.h"
+#include "lua-graph-priv.h"
 #include "fonts.h"
 #include "window_registry.h"
 #include "lua-draw.h"

@@ -28,6 +28,7 @@ extern "C" {
 #include "lua-plot-cpp.h"
 #include "window_hooks.h"
 #include "lua-graph.h"
+#include "lua-graph-priv.h"
 #include "lua-cpp-utils.h"
 #include "bitmap-plot.h"
 #include "gs-types.h"

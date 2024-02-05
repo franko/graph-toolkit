@@ -6,6 +6,7 @@ extern "C" {
 
 #include "lua-compat.h"
 #include "lua-defs.h"
+#include "lua-graph-priv.h"
 #include "window-cpp.h"
 #include "window_registry.h"
 #include "lua-cpp-utils.h"

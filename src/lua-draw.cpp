@@ -29,6 +29,7 @@ extern "C" {
 #include "lua-compat.h"
 #include "lua-draw.h"
 #include "lua-graph.h"
+#include "lua-graph-priv.h"
 #include "text-shape.h"
 #include "lua-cpp-utils.h"
 #include "gs-types.h"

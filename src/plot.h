@@ -49,6 +49,8 @@
 #include "agg_conv_dash.h"
 #include "agg_gsv_text.h"
 
+constexpr double math_pi = 3.14159265358979323846;
+
 template <class Canvas>
 class canvas_adapter : public virtual_canvas {
 public:
@@ -214,7 +216,7 @@ public:
 
         void set_labels_angle(double angle)
         {
-            double a = (dir == x_axis ? -angle + M_PI/2 : -angle);
+            double a = (dir == x_axis ? -angle + math_pi/2 : -angle);
             double c = cos(a), s = sin(a);
             m_labels_hjustif = round(c + 1.0) / 2.0;
             m_labels_vjustif = round(s + 1.0) / 2.0;

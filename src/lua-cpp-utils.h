@@ -2,6 +2,7 @@
 #define LUA_CPP_UTILS_H
 
 #include <new>
+#include <utility>
 
 #include "defs.h"
 #include "lua-defs.h"

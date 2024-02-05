@@ -604,7 +604,7 @@ void plot::draw_axis(canvas_type& canvas, plot_layout& layout, const agg::rect_i
         const char* text = m_y_axis.title.cstr();
         draw::text ylabel(text, label_text_size, 0.5, 1.0);
         ylabel.set_point(labx, laby);
-        ylabel.angle(M_PI/2.0);
+        ylabel.angle(math_pi/2.0);
         ylabel.apply_transform(identity_matrix, 1.0);
 
         canvas.draw(ylabel, colors::black);

@@ -48,22 +48,33 @@ inline void* operator new(size_t nbytes, lua_State *L, enum gs_type_e tp)
     return p;
 }
 
+#ifdef GRAPH_TK_USE_LUA54
 inline void* operator new(size_t nbytes, lua_State *L, enum gs_type_e tp, int nuvalue)
 {
     void* p = lua_newuserdatauv(L, nbytes, nuvalue);
     gs_set_metatable (L, tp);
     return p;
 }
+#endif
 
 template <class T, class... Args>
 T* push_new_object(lua_State *L, enum gs_type_e tp, Args&&... args) {
     return new(L, tp) T(std::forward<Args>(args)...);
 }
 
+#ifdef GRAPH_TK_USE_LUA54
 template <class T, class... Args>
 T* push_new_object_uv(lua_State *L, enum gs_type_e tp, int nuvalue, Args&&... args) {
     return new(L, tp, nuvalue) T(std::forward<Args>(args)...);
 }
+#else
+template <class T, class... Args>
+T* push_new_object_uv(lua_State *L, enum gs_type_e tp, int nuvalue, Args&&... args) {
+    // We ignore the nuvalue argument when using Lua 5.1 because later lua_setfenv
+    // will be used and no upvalues have to be requested when the object is created.
+    return new(L, tp) T(std::forward<Args>(args)...);
+}
+#endif
 
 template <class T>
 int object_free (lua_State *L, int index, enum gs_type_e tp)

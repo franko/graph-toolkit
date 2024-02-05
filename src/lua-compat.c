@@ -11,7 +11,7 @@ grtk_lua_register(lua_State *L, const luaL_Reg *regs)
 #ifdef GRAPH_TK_USE_LUA54
     luaL_setfuncs (L, regs, 0);
 #else
-    grtk_lua_register (L, NULL, regs);
+    luaL_register (L, NULL, regs);
 #endif
 }
 
@@ -40,6 +40,7 @@ int grtk_lua_getfenv(lua_State *L, int index)
 #ifdef GRAPH_TK_USE_LUA54
     return lua_getiuservalue (L, index, 1);
 #else
-    return lua_getfenv (L, index);
+    lua_getfenv (L, index);
+    return 0;
 #endif
 }

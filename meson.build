@@ -2,9 +2,12 @@ project('graph-toolkit', ['c', 'cpp'], version : '1.0', default_options : ['c_st
 
 cc = meson.get_compiler('c')
 
-graph_toolkit_lua = get_option('lua')
+lua_name = get_option('lua')
 
-lua_dep = dependency(graph_toolkit_lua)
+# Luajit should use lua/5.1 directory, in addition to luajit-2.0 or luajit-2.1
+lua_modules_dir = (lua_name == 'lua5.4' ? 'lua/5.4' : 'lua/5.1')
+
+lua_dep = dependency(lua_name)
 freetype_dep = dependency('freetype2')
 thread_dep = dependency('threads')
 
@@ -24,5 +27,5 @@ graph_toolkit_c_args = [ ]
 
 subdir('src')
 
-install_data('init.lua', install_dir : 'share/lua/5.4/graph')
-install_data('contour.lua', install_dir : 'share/lua/5.4/graph')
+install_data('init.lua', rename : 'graph.lua', install_dir : 'share' / lua_modules_dir)
+install_data('contour.lua', install_dir : 'share' / lua_modules_dir / 'graph')

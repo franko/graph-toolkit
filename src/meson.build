@@ -36,7 +36,7 @@ if not get_option('subpixel-lcd')
   graph_toolkit_c_args += '-DDISABLE_SUBPIXEL_AA'
 endif
 
-if graph_toolkit_lua == 'lua5.4'
+if lua_name == 'lua5.4'
   graph_toolkit_c_args += '-DGRAPH_TK_USE_LUA54'
 endif
 
@@ -65,7 +65,7 @@ libgraph = shared_library('graphcore',
   link_args : graph_toolkit_link_args,
   gnu_symbol_visibility : 'hidden',
   name_prefix : '',
-  install_dir : 'lib/lua/5.4',
+  install_dir : 'lib' / lua_modules_dir,
   install : true,
 )
 

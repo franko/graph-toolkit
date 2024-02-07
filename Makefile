@@ -1,7 +1,7 @@
 
 # Makefile
 #
-# Copyright (C) 2014 Francesco Abbate
+# Copyright (C) 2014-2024 Francesco Abbate
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 
 include src/makeconfig
 
-VERSION = 1.0
+VERSION = 1.1
 
 PREFIX = /usr
 DEST_DIR =

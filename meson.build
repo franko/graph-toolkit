@@ -1,4 +1,4 @@
-project('graph-toolkit', ['c', 'cpp'], version : '1.0', default_options : ['c_std=gnu11', 'cpp_std=c++14'])
+project('graph-toolkit', ['c', 'cpp'], version : '1.1', default_options : ['c_std=gnu11', 'cpp_std=c++14'])
 
 cc = meson.get_compiler('c')
 

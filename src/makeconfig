@@ -1,0 +1,14 @@
+# set this to "yes" if you want to disable gamma correction
+DISABLE_GAMMA_CORR = no
+
+# set this to "yes" if you want to disable subpixel LCD antialiasing
+DISABLE_SUBPIXEL_LCD = no
+
+# Can be "luajit" or "lua5.1" to use a specific Lua implementation.
+LUA = lua5.1
+
+DEBUG = no
+
+# Define if a static or shared library should be built. Can be "static"
+# or "dynamic"
+BUILD = dynamic

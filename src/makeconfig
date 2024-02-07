@@ -5,7 +5,8 @@ DISABLE_GAMMA_CORR = no
 DISABLE_SUBPIXEL_LCD = no
 
 # Can be "luajit" or "lua5.1" to use a specific Lua implementation.
-LUA = lua5.1
+LUA = lua5.4
+LUA_VERSION = 5.4
 
 DEBUG = no
 

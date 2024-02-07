@@ -33,9 +33,8 @@ endif
 
 GRAPH_LUA_SRC = init.lua contour.lua
 
-LUA_PATH = $(DEST_PREFIX)/share/lua/5.1
-LUA_DLLPATH = $(DEST_PREFIX)/lib/lua/5.1
-DEBIAN = debian_build/$(PREFIX)
+LUA_PATH = $(DEST_PREFIX)/share/lua/$(LUA_VERSION)
+LUA_DLLPATH = $(DEST_PREFIX)/lib/lua/$(LUA_VERSION)
 WIN_INSTALL_DIR = windows_build
 
 all:
@@ -59,18 +58,6 @@ arch:
 	@install -m 755 -d ${LUA_DLLPATH}
 	@install -m 755 src/libgraphcore.so ${LUA_DLLPATH}/graphcore.so
 
-
-debian:
-	$(MAKE) -C src
-	rm -fr debian_build
-	rm -fr lua-graph-toolkit*.deb
-	mkdir -p $(DEBIAN)/share/lua/5.1
-	mkdir -p $(DEBIAN)/share/lua/5.1/graph
-	mkdir -p $(DEBIAN)/lib/lua/5.1
-	cp src/libgraphcore.so $(DEBIAN)/lib/lua/5.1/graphcore.so
-	cp $(GRAPH_LUA_SRC) $(DEBIAN)/share/lua/5.1/graph
-	fakeroot bash debian/build.sh $(VERSION) $(LUA)
-
 win_install:
 	$(MAKE) -C src
 	mkdir -p $(WIN_INSTALL_DIR)
@@ -80,4 +67,4 @@ win_install:
 	cp $(GRAPH_LUA_SRC) $(WIN_INSTALL_DIR)/lua/graph
 	cp -r examples $(WIN_INSTALL_DIR)
 
-.PHONY: clean all install debian win_install
+.PHONY: clean all install win_install

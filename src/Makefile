@@ -32,19 +32,15 @@ else
   endif
 endif
 
-ARCH := $(shell uname -m)
-
-ifeq ($(ARCH), i686)
-  CCOPT_ARCH = -march=i686
-endif
-
+CFLAGS += -fvisibility=hidden
+CXXFLAGS += -fvisibility=hidden
 ifeq ($(strip $(DEBUG)), yes)
   CFLAGS += -g -Wall
   CXXFLAGS += -g -Wall
   DEFS += -LIBGRAPH_DEBUG
 else
-  CFLAGS += $(CCOPT_ARCH) -O2 -fomit-frame-pointer -ffast-math -Wall
-  CXXFLAGS += $(CCOPT_ARCH) -O2 -fno-exceptions -ffast-math -fno-rtti -Wall
+  CFLAGS += -O2 -fomit-frame-pointer -ffast-math -Wall
+  CXXFLAGS += -O2 -fno-exceptions -ffast-math -fno-rtti -Wall
 endif
 
 PTHREAD_DEFS += -D_REENTRANT
@@ -58,63 +54,47 @@ ifeq ($(strip $(DISABLE_SUBPIXEL_LCD)), yes)
   DEFS += -DDISABLE_SUBPIXEL_AA
 endif
 
-ifeq ($(HOST_SYS),Windows)
-  CC = gcc
-  DYNCC = $(CC)
-  CXX = g++
-  DYNCXX = $(CXX)
-  DLLINK = gcc -static-libgcc -shared
-
-  DISPLAY_SUFFIX = win32
-
-  USER_LIBS_HOME = C:/fra/local
-  USER_INCLUDE = $(USER_LIBS_HOME)/include
-
-  INCLUDES += -I$(USER_INCLUDE) -I/usr/include -I/usr/pthreads-w32/include
-  LIBS += -L$(USER_LIBS_HOME)/lib
-
-  AGG_INCLUDES = -I$(USER_INCLUDE)/agg2
-  AGG_LIBS = -lagg -lgdi32
-
-  FREETYPE_INCLUDES = -I$(USER_INCLUDE)/freetype
-  FREETYPE_LIBS = -lfreetype
-
-  PTHREAD_LIBS = -lpthread
-
-  LIBGRAPH_SO = graphcore.dll
-
-  LUA_INCLUDES = -IC:/fra/src/luajit-2.0/src
-  LUA_LIBS = -LC:/fra/src/luajit-2.0/src -llua51
-
-  LDFLAGS += -Wl,--enable-auto-import
-  LIBS += -L/usr/lib
-
-  DEFS += -DWIN32
-else
-  CC = gcc
-  DYNCC = $(CC) -fPIC
-  CXX = g++
-  DYNCXX = $(CXX) -fPIC
-  DLLINK = gcc -shared
-
-  X11_INCLUDES = $(shell pkg-config x11 --cflags)
-  X11_LIBS = $(shell pkg-config x11 --libs)
-
 # GWH (for OS X): pkg-config will include "-Wl,-rpath,/opt/local/lib" in AGG_LIBS.
 # If you don't include that, the code won't run unless you first do:
 #   export DYLD_FALLBACK_LIBRARY_PATH=/opt/local/lib
 
-  AGG_INCLUDES = $(shell pkg-config libagg --cflags)
-  AGG_LIBS = $(shell pkg-config libagg --libs)
+AGG_INCLUDES = $(shell pkg-config libagg --cflags)
+AGG_LIBS = $(shell pkg-config libagg --libs)
 
-  FREETYPE_INCLUDES = $(shell pkg-config freetype2 --cflags)
-  FREETYPE_LIBS = $(shell pkg-config freetype2 --libs)
+FREETYPE_INCLUDES = $(shell pkg-config freetype2 --cflags)
+FREETYPE_LIBS = $(shell pkg-config freetype2 --libs)
 
-  LUA_INCLUDES = $(shell pkg-config --cflags $(LUA))
-  LUA_LIBS = $(shell pkg-config --libs $(LUA))
+LUA_INCLUDES = $(shell pkg-config --cflags $(LUA))
+LUA_LIBS = $(shell pkg-config --libs $(LUA))
 
-  PTHREAD_DEFS += -pthread
-  PTHREAD_LIBS = -lpthread
+PTHREAD_DEFS += -pthread
+PTHREAD_LIBS = -lpthread
+
+INCLUDES += $(LUA_INCLUDES) $(FREETYPE_INCLUDES) $(AGG_INCLUDES)
+LIBS += $(FREETYPE_LIBS) $(AGG_LIBS) $(LUA_LIBS) $(PTHREAD_LIBS)
+DEFS += $(PTHREAD_DEFS)
+
+ifeq ($(strip $(LUA)),lua5.4)
+  INCLUDES += -DGRAPH_TK_USE_LUA54
+endif
+
+ifeq ($(HOST_SYS),Windows)
+  DYNCC = $(CC)
+  DYNCXX = $(CXX)
+  DLLINK = $(CC) -shared -fvisibility=hidden
+
+  DISPLAY_SUFFIX = win32
+  LIBGRAPH_SO = graphcore.dll
+else
+  X11_INCLUDES = $(shell pkg-config x11 --cflags)
+  X11_LIBS = $(shell pkg-config x11 --libs)
+
+  INCLUDES += $(X11_INCLUDES)
+  LIBS += $(X11_LIBS)
+
+  DYNCC = $(CC) -fPIC
+  DYNCXX = $(CXX) -fPIC
+  DLLINK = $(CC) -shared -fvisibility=hidden
 
   ifeq ($(HOST_SYS),Darwin)
     LINK_EXE = $(CXX) $(LDFLAGS)
@@ -122,8 +102,7 @@ else
   endif
 
   DISPLAY_SUFFIX = x11
-
-  LIBGRAPH_SO = libgraphcore.so
+  LIBGRAPH_SO = graphcore.so
 endif
 
 LIBGRAPH_A = libgraphcore.a
@@ -137,11 +116,7 @@ else
   PLATFORM_SRC_FILES = agg_platform_support_x11.cpp
 endif
 
-INCLUDES += $(LUA_INCLUDES) $(FREETYPE_INCLUDES) $(X11_INCLUDES) $(AGG_INCLUDES)
-LIBS += $(FREETYPE_LIBS) $(AGG_LIBS) $(X11_LIBS) $(LUA_LIBS) $(PTHREAD_LIBS)
-DEFS += $(PTHREAD_DEFS)
-
-PLOT_CSRC_FILES = str.c gs-types.c lua-utils.c lua-properties.c
+PLOT_CSRC_FILES = str.c gs-types.c lua-utils.c lua-properties.c lua-compat.c
 PLOT_CPPSRC_FILES = gamma.cpp printf_check.cpp utils.cpp \
 	window_registry.cpp fonts_search_$(DISPLAY_SUFFIX).cpp \
 	$(PLATFORM_SRC_FILES) image_write_$(DISPLAY_SUFFIX).cpp \
@@ -199,6 +174,6 @@ clean:
             >> .deps/$(*F).P; \
 	rm .deps/$(*F).pp
 
-.PHONY: debian clean all
+.PHONY: clean all
 
 -include $(DEP_FILES)

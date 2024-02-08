@@ -46,30 +46,48 @@ elements, creating a more complex animation.
 Building
 --------
 
-The graphics module can be built using the Meson build system with the command:
-
-```sh
-# Use the lua option to choose between: lua5.1, lua5.4 and luajit
-meson setup -Dlua=lua5.4 build
-```
+The graphics module can be built either using the Meson build system or using GNU make.
 
 To build the following development packages are required:
 
 - the freetype2 library
 - the corresponding Lua or LuaJIT development package
 
-The AGG library is used but it will be automatically downloaded and built so the corresponding
-development package is not needed.
+The AGG library is also required but, when using Meson, it will be automatically
+downloaded and built so the corresponding development package is not needed.
+When using the Makefile instead it is required to install the AGG library
+development package.
+
+To build using Meson use the commands:
+
+```sh
+# The following command setup the build.
+# Use the lua option to choose between: lua5.1, lua5.4 and luajit
+# Meson will accept the following general options:
+# - --prefix=<prefix-dir>
+# - --buildtype=<release-or-debug>
+meson setup -Dlua=lua5.4 build
+
+# The following command will actually compile the library
+meson compile -C .build
+
+# Do the following to install. Meson accept a --destdir option to
+# specify a destination directory for packaging.
+meson install -C .build
+```
+
+To build using GNU Makefile please edit src/makeconfig to choose
+the Lua version to use or LuaJIT and the prefix directory, then
+use the commands:
+
+```sh
+make
+make DESTDIR=<dest-dir> install
+```
+
 
 History
 -------
 
 The Lua Graphics Module was previously part of GSL Shell where it is still used. By looking at GSL Shell you can find more example of its utilisation.
-
-Try It Out
-----------
-
-You can easily try the Lua Graphics Toolkit on Windows by downloading the binary packages
-available in the github repository [release page](https://github.com/franko/graph-toolkit/releases).
-The packages includes the graphics module and the Lua or LuaJIT executable itself.
 

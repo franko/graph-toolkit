@@ -4,8 +4,10 @@ DISABLE_GAMMA_CORR = no
 # set this to "yes" if you want to disable subpixel LCD antialiasing
 DISABLE_SUBPIXEL_LCD = no
 
-# Can be "luajit" or "lua5.1" to use a specific Lua implementation.
+# Can be "luajit", "lua5.4" "lua5.1" to use a specific Lua implementation.
 LUA = lua5.4
+
+# vill me used to decide where to install the modules under share/lua
 LUA_VERSION = 5.4
 
 DEBUG = no

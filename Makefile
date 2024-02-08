@@ -35,7 +35,6 @@ GRAPH_LUA_SRC = init.lua contour.lua
 
 LUA_PATH = $(DEST_PREFIX)/share/lua/$(LUA_VERSION)
 LUA_DLLPATH = $(DEST_PREFIX)/lib/lua/$(LUA_VERSION)
-WIN_INSTALL_DIR = windows_build
 
 all:
 	$(MAKE) -C src
@@ -47,24 +46,7 @@ install:
 	$(MAKE) -C src
 	mkdir -p $(LUA_PATH)/graph
 	mkdir -p $(LUA_DLLPATH)
-	cp src/libgraphcore.so $(LUA_DLLPATH)/graphcore.so
+	cp src/graphcore.so $(LUA_DLLPATH)/graphcore.so
 	cp $(GRAPH_LUA_SRC) $(LUA_PATH)/graph
 
-arch:
-	@mkdir -p ${LUA_PATH}/graph
-	@install -m 755 -d ${LUA_PATH}/graph
-	@install -m 755 ${GRAPH_LUA_SRC} ${LUA_PATH}/graph
-	@mkdir -p ${LUA_DLLPATH}
-	@install -m 755 -d ${LUA_DLLPATH}
-	@install -m 755 src/libgraphcore.so ${LUA_DLLPATH}/graphcore.so
-
-win_install:
-	$(MAKE) -C src
-	mkdir -p $(WIN_INSTALL_DIR)
-	mkdir -p $(WIN_INSTALL_DIR)/lua
-	mkdir -p $(WIN_INSTALL_DIR)/lua/graph
-	cp src/graphcore.dll $(WIN_INSTALL_DIR)
-	cp $(GRAPH_LUA_SRC) $(WIN_INSTALL_DIR)/lua/graph
-	cp -r examples $(WIN_INSTALL_DIR)
-
-.PHONY: clean all install win_install
+.PHONY: clean all install

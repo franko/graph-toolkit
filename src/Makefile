@@ -71,7 +71,7 @@ PTHREAD_DEFS += -pthread
 PTHREAD_LIBS = -lpthread
 
 INCLUDES += $(LUA_INCLUDES) $(FREETYPE_INCLUDES) $(AGG_INCLUDES)
-LIBS += $(FREETYPE_LIBS) $(AGG_LIBS) $(LUA_LIBS) $(PTHREAD_LIBS)
+LIBS += $(FREETYPE_LIBS) $(AGG_LIBS) $(LUA_LIBS) $(PTHREAD_LIBS) $(CPP_SUP_LIBS)
 DEFS += $(PTHREAD_DEFS)
 
 ifeq ($(strip $(LUA)),lua5.4)
@@ -81,7 +81,8 @@ endif
 ifeq ($(HOST_SYS),Windows)
   DYNCC = $(CC)
   DYNCXX = $(CXX)
-  DLLINK = $(CC) -shared -fvisibility=hidden
+  DLLINK = $(CC) -shared
+  LDFLAGS += -fvisibility=hidden
 
   DISPLAY_SUFFIX = win32
   LIBGRAPH_SO = graphcore.dll
@@ -94,10 +95,17 @@ else
 
   DYNCC = $(CC) -fPIC
   DYNCXX = $(CXX) -fPIC
-  DLLINK = $(CC) -shared -fvisibility=hidden
+  DLLINK = $(CC) -shared
+  LDFLAGS += -fvisibility=hidden
+
+  ifeq ($(HOST_SYS),Linux)
+    # See: https://stackoverflow.com/questions/2222162/how-to-apply-fvisibility-option-to-symbols-in-static-libraries
+    # The following flag is to consider hidden all the symbols defined in static libraries we use
+    # to link the shared library.
+    LDFLAGS += -Wl,--exclude-libs,ALL
+  endif
 
   ifeq ($(HOST_SYS),Darwin)
-    LINK_EXE = $(CXX) $(LDFLAGS)
     LDFLAGS += -Wl,-E
   endif
 
@@ -145,7 +153,7 @@ endif
 all: $(TARGETS)
 
 $(LIBGRAPH_SO): $(PLOT_OBJ_FILES)
-	$(DLLINK) $(PLOT_OBJ_FILES) -o $@ $(LIBS) -lsupc++
+	$(DLLINK) $(LDFLAGS) $(PLOT_OBJ_FILES) -o $@ $(LIBS)
 	strip --strip-unneeded $@
 
 $(LIBGRAPH_A): $(PLOT_OBJ_FILES)

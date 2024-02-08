@@ -53,8 +53,15 @@ else
 endif
 
 graph_toolkit_link_args = [ ]
-if cc.get_id() == 'gcc' and get_option('buildtype') == 'release'
-    graph_toolkit_link_args += ['-static-libgcc', '-static-libstdc++']
+if cc.get_id() == 'gcc'
+  graph_toolkit_link_args += ['-static-libgcc', '-static-libstdc++']
+endif
+
+if host_machine.system() == 'linux'
+  # See: https://stackoverflow.com/questions/2222162/how-to-apply-fvisibility-option-to-symbols-in-static-libraries
+  # The following flag is to consider hidden all the symbols defined in static libraries we use
+  # to link the shared library.
+  graph_toolkit_link_args += [ '-Wl,--exclude-libs,ALL' ]
 endif
 
 libgraph = shared_library('graphcore',

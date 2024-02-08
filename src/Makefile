@@ -83,6 +83,7 @@ ifeq ($(HOST_SYS),Windows)
   DYNCXX = $(CXX)
   DLLINK = $(CC) -shared
   LDFLAGS += -fvisibility=hidden
+  LIBS += -lgdi32
 
   DISPLAY_SUFFIX = win32
   LIBGRAPH_SO = graphcore.dll
@@ -116,7 +117,7 @@ endif
 LIBGRAPH_A = libgraphcore.a
 
 ifeq ($(HOST_SYS),Windows)
-  PLATFORM_SRC_FILES = agg_platform_support_win32.cpp agg_win32_bmp.cpp agg_win32_bmp.cpp
+  PLATFORM_SRC_FILES = agg_platform_support_win32.cpp agg_win32_bmp.cpp
 else
   ifeq ($(HOST_SYS),Darwin)
     DEFS += -DDARWIN_MACOSX
